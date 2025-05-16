@@ -1,0 +1,11 @@
+specfile = block, {block};
+
+block = 
+
+device = 
+
+connect = "CONNECT", signal, "->", {" "}, signal, [".", pinname];
+
+signal =
+
+pinname = 
