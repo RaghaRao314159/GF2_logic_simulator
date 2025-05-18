@@ -4,7 +4,7 @@ block =
 
 device = 
 
-connect = "CONNECT", signal, "->", {" "}, signal, [".", pinname];
+connect = "CONNECT", {" "}, signal, "->", {" "}, signal, [".", pinname];
 
 signal =
 

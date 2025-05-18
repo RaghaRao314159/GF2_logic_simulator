@@ -1,0 +1,75 @@
+specfile = block, {block};
+
+block = (devices | devicename | connection | monitor | comment), eol ;
+
+
+
+devices = delimitter, "DEVICES ", delimitter, number, delimitter, " of ", delimitter, devicetype, {delimitter, ",", delimitter, number, delimitter, " of ", delimitter, devicetype}, delimitter, eol ;
+
+devicename = delimitter, "NAME ", delimitter, name, delimitter, ":", delimitter, devicetype, [delimitter, ",", delimitter, "IN", delimitter, ":", delimitter, number], [delimitter, ",", delimitter, "OUT", delimitter, ":", delimitter, number], [delimitter, ",", delimitter, "PERIOD", delimitter, ":", delimitter, number], [delimitter, ",", delimitter, "INITIAL", delimitter, ":", delimitter, bit],  eol ;
+
+devicetype = "CLOCK" | "SWITCH" | "AND" | "NAND" | "OR" | "NOR" | "DTYPE" | "XOR" ;
+
+
+
+connection = delimitter, "CONNECT ", delimitter, signal, delimitter, "->", delimitter, signal, {delimitter, ",", delimitter, signal, delimitter, "->", delimitter, signal}, delimitter, eol ;
+
+signal = name, [".", pinname] ;
+
+pinname = numberedpin | fixedpin ;
+
+numberedpin = ("I", number) ;
+
+fixedpin = "DATA"| "CLK" | "SET" | "CLEAR" | "Q" | "QBAR" ;
+
+
+
+monitor = delimitter, "MONITOR ", delimitter, signal, {delimitter, ",", delimitter, signal}, delimitter, eol;
+
+
+
+name = letter, {letter | digit} ;
+
+space = {" " | "\t"} ;
+
+linebreak = {"\n"} ;
+
+delimitter = space, [linebreak], space ;
+
+eol = ";" ;
+
+letter = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z" | "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z" ;
+
+number = digit, {digit} ;
+
+digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+
+bit = "0" | "1" ;
+
+
+------------------------------------------------------------------------------
+
+My own notes
+
+space: includes regular space or tab
+eol: end of line (I have specified as semicolon)
+delimitter: stuff that goes inbetween keywords (includes space and new line)
+
+------------------------------------------------------------------------------
+
+Example code for circuit in A3 under this EBNF
+
+DEVICES 2 of NAND, 2 of SWITCH ;
+
+NAME G1:NAND, IN:2 ;
+NAME G2:NAND, IN:2 ;
+
+NAME SW1:SWITCH, INITIAL:0 ;
+NAME SW2:SWITCH, INITIAL:0 ;
+
+CONNECT SW1->G1.I1,
+        SW2->G2.I2,
+        G1->G2.I1,
+        G2->G1.I2 ;
+
+MONITOR G1, G2 ;
