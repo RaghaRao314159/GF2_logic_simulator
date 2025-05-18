@@ -28,6 +28,10 @@ monitor = delimitter, "MONITOR ", delimitter, signal, {delimitter, ",", delimitt
 
 
 
+comment = "/*", {delimitter | letter | digit | punctuation} "*/"
+
+
+
 name = letter, {letter | digit} ;
 
 space = {" " | "\t"} ;
@@ -46,6 +50,8 @@ digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
 
 bit = "0" | "1" ;
 
+punctuation = "." | "," | "!" | "?" | ":" | ";" | "'" | "(" | ")" | "[" | "]" | "{" | "}" | "-" | "&" | "@" | "#" | "%" | "^" | "*" | "+" | "=" | "<" | ">" | "|" | "~" | "$" ;
+
 
 ------------------------------------------------------------------------------
 
@@ -54,22 +60,89 @@ My own notes
 space: includes regular space or tab
 eol: end of line (I have specified as semicolon)
 delimitter: stuff that goes inbetween keywords (includes space and new line)
+comments: multiline, bans slashes as they are used for escape characters and initialising comments
+
 
 ------------------------------------------------------------------------------
 
-Example code for circuit in A3 under this EBNF
+Valid code for circuit in A3 under this EBNF
 
+/* define the list of devices */ 
 DEVICES 2 of NAND, 2 of SWITCH ;
 
+/* name the NAND gates */
 NAME G1:NAND, IN:2 ;
 NAME G2:NAND, IN:2 ;
 
+/* name the switches */
 NAME SW1:SWITCH, INITIAL:0 ;
 NAME SW2:SWITCH, INITIAL:0 ;
 
+/* connect a NAND latch */
 CONNECT SW1->G1.I1,
         SW2->G2.I2,
         G1->G2.I1,
         G2->G1.I2 ;
 
+/* monitor outputs of both NAND gates */
 MONITOR G1, G2 ;
+
+------------------------------------------------------------------------------
+
+CURSED Valid code for circuit in A3 under this EBNF
+
+/* define the list 
+
+        of devices */ 
+
+DEVICES 
+    2 of NAND  , 
+    2 
+        of      SWITCH 
+        ;
+
+/* 
+    name the NAND 
+        gates */
+
+NAME G1     :     NAND, 
+    IN:
+        2       ;
+
+NAME G2     :    NAND   
+    ,  IN  :
+         2 
+         ;
+
+/* name 
+      the switches 
+*/
+
+NAME SW1  :
+ SWITCH   , 
+  INITIAL  :     0  ;
+      
+      NAME SW2 :
+          SWITCH  , 
+             INITIAL :
+                0 ;
+
+/* connect a NAND latch */
+CONNECT 
+  SW1   ->   G1.I1   ,
+        SW2
+              ->   G2.I2   
+              ,
+        G1   ->   G2.I1     ,
+    G2-> 
+     G1.I2 ;
+
+/* monitor 
+outputs of both NAND 
+gates */
+
+MONITOR 
+                      G1   
+        , 
+               G2 
+               ;
