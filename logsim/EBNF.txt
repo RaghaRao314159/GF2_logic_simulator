@@ -1,11 +1,128 @@
-specfile = block, {block};
+specfile = {comment}, devices, {devices | connection | monitor | comment};
 
-block = 
 
-device = 
 
-connect = "CONNECT", {" "}, signal, "->", {" "}, signal, [".", pinname];
+devices =  "DEVICES", device, {",", device} ,  eol ;
 
-signal =
+device = name,  ":",  devicetype, [ "(",  "IN",  ":",  number, ")"], [ "(",  "OUT",  ":",  number, ")"], [ "(",  "PERIOD",  ":",  number, ")"], [ "(",  "INITIAL",  ":",  bit, ")"]
 
-pinname = 
+devicetype = "CLOCK" | "SWITCH" | "AND" | "NAND" | "OR" | "NOR" | "DTYPE" | "XOR" ;
+
+
+
+connection =  "CONNECT ", con, { ",",  con},  eol ;
+
+con = signal,  "->",  signal
+
+signal = name, [".", pinname] ;
+
+pinname = numberedpin | fixedpin ;
+
+numberedpin = "I", ("1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "13" | "14" | "15" | "16") ;
+
+fixedpin = "DATA"| "CLK" | "SET" | "CLEAR" | "Q" | "QBAR" ;
+
+
+
+monitor =  "MONITOR ",  signal, { ",",  signal},  eol;
+
+
+
+comment = "/*", {" " | "\t" | "\n" | letter | digit | punctuation} "*/"
+
+
+
+name = letter, {letter | digit} ;
+
+
+
+eol = ";" ;
+
+letter = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z" | "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z" ;
+
+number = digit, {digit} ;
+
+digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+
+bit = "0" | "1" ;
+
+punctuation = "." | "," | "!" | "?" | ":" | ";" | "'" | "(" | ")" | "[" | "]" | "{" | "}" | "-" | "&" | "@" | "#" | "%" | "^" | "*" | "+" | "=" | "<" | ">" | "|" | "~" | "$" ;
+
+
+------------------------------------------------------------------------------
+
+My own notes
+
+space: includes regular space or tab
+eol: end of line (I have specified as semicolon)
+delimitter: stuff that goes inbetween keywords (includes space and new line)
+comments: multiline, bans slashes as they are used for escape characters and initialising comments
+
+
+------------------------------------------------------------------------------
+
+Valid code for circuit in A3 under this EBNF
+
+/* name the NAND gates */
+DEVICES G1:NAND (IN:2),
+        G2:NAND (IN:2) ;
+
+/* name the switches */
+DEVICES SW1:SWITCH (INITIAL:0), 
+        SW2:SWITCH (INITIAL:0) ;
+
+/* connect a NAND latch */
+CONNECT SW1->G1.I1,
+        SW2->G2.I2,
+        G1->G2.I1,
+        G2->G1.I2 ;
+
+/* monitor outputs of both NAND gates */
+MONITOR G1, G2 ;
+
+------------------------------------------------------------------------------
+
+CURSED Valid code for circuit in A3 under this EBNF
+
+/* 
+    name the NAND 
+        gates */
+
+DEVICES G1:NAND 
+                (IN:2),
+    G2:NAND 
+    
+    (IN:2) 
+                  ;
+
+/* name the switches */
+DEVICES SW1
+           :
+   SWITCH (
+                       INITIAL:
+                                 0), 
+        SW2
+        :
+        SWITCH (INITIAL
+                        :0) 
+  ;
+
+/* connect a NAND latch */
+CONNECT 
+  SW1   ->   G1.I1   ,
+        SW2
+              ->   G2.I2   
+              ,
+        G1   ->   G2.I1     ,
+    G2-> 
+     G1.I2 ;
+
+/* monitor 
+outputs of both NAND 
+gates */
+
+MONITOR 
+                      G1   
+        , 
+               G2 
+               ;
