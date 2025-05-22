@@ -1,18 +1,15 @@
 Example 1:
 /* 
-    name the gates - number of inputs and outputs 
+    Name the gates, switches and clocks. 
+    Number of inputs and outputs
     does not need to be defined for DTYPE 
-*/
+*/  
 
 DEVICES D1:DTYPE,
         D2:DTYPE,
-        N1:NAND (IN:2) ;
-
-/* name the clock(s) */
-DEVICES C1:CLOCK (PERIOD:8) ;
-
-/* name the switches */
-DEVICES S1:SWITCH (INITIAL:0), 
+        N1:NAND (IN:2),
+        C1:CLOCK (PERIOD:8),
+        S1:SWITCH (INITIAL:0), 
         S2:SWITCH (INITIAL:1),
         S3 SWITCH (INITIAL:0) ;
 
