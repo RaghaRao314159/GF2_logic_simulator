@@ -1,4 +1,4 @@
-specfile = {comment}, devices, {devices | connection | monitor | comment};
+specfile = {comment}, devices, {devices | connections | monitor | comment};
 
 
 
@@ -10,9 +10,9 @@ devicetype = "CLOCK" | "SWITCH" | "AND" | "NAND" | "OR" | "NOR" | "DTYPE" | "XOR
 
 
 
-connection =  "CONNECT ", con, { ",",  con},  eol ;
+connections =  "CONNECT ", connection, { ",",  connection},  eol ;
 
-con = signal,  "->",  signal
+connection = signal,  "->",  signal
 
 signal = name, [".", pinname] ;
 
@@ -28,7 +28,7 @@ monitor =  "MONITOR ",  signal, { ",",  signal},  eol;
 
 
 
-comment = "/*", {" " | "\t" | "\n" | letter | digit | punctuation} "*/"
+comment = "/*", {" " | "\t" | "\n" | letter | digit | punctuation}, "*/" ;
 
 
 

@@ -1,0 +1,3 @@
+# Is this key assumption: Assume that the clock signal is rising-edge triggered
+Example 1:
+
