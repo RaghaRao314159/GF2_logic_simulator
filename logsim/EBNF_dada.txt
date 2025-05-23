@@ -31,10 +31,11 @@ CONNECT S1->D1.SET,
 MONITOR D1.QBAR, 
         N1 ;
 
+
 Example Two:
 
 /* This configuration is a full-adder */
-
+--------------------------------------------
 /* name all devices */
 DEVICES X1:XOR (IN:2),
         X2:XOR (IN:2),
@@ -62,3 +63,27 @@ CONNECT S1->X1.I1,
 /* monitor particular signals */
 MONITOR X2, 
         O1 ;
+
+
+Example Three:
+
+/* There is a deliberate error in the code */
+----------------------------------------------
+    DEVICES N1:NAND (IN:2),
+            N2:NOR (IN:2),
+            A1:AND (IN:2),
+            S1:SWITCH (INITIAL:1), 
+            S2:SWITCH (INITIAL:0);
+    
+    CONNECT S1->N1.I1,
+            S2->N1.I2,
+            S1->N2.I1,
+            S2->N2.I2,
+    
+            N1->A1.I1,
+            N2->A2.I2,
+    
+            A1->O1.I1,
+            A2->O1.I2 ;
+    
+    MONITOR A1;
