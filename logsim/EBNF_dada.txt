@@ -35,7 +35,8 @@ MONITOR D1.QBAR,
 Example Two:
 
 /* This configuration is a full-adder */
---------------------------------------------
+-----------------------------------------
+
 /* name all devices */
 DEVICES X1:XOR (IN:2),
         X2:XOR (IN:2),
@@ -67,23 +68,37 @@ MONITOR X2,
 
 Example Three:
 
-/* There is a deliberate error in the code */
-----------------------------------------------
-    DEVICES N1:NAND (IN:2),
-            N2:NOR (IN:2),
+/* This code is an extreme example to showcase the 
+free-form nature of the language. */
+-----------------------------------------------------
+
+    /* name all                   devices */
+    DEVICES X1:XOR (IN:2),
+                        X2:XOR (IN:2),
             A1:AND (IN:2),
+A2:AND (IN:2),
+O1:OR (IN:2),
             S1:SWITCH (INITIAL:1), 
-            S2:SWITCH (INITIAL:0);
+        S2:SWITCH (INITIAL:1), S3 SWITCH (INITIAL:0) ;
     
-    CONNECT S1->N1.I1,
-            S2->N1.I2,
-            S1->N2.I1,
-            S2->N2.I2,
+    /* connect inputs 
     
-            N1->A1.I1,
-            N2->A2.I2,
     
-            A1->O1.I1,
-            A2->O1.I2 ;
+    and outputs */
+    CONNECT S1->                X1.I1,
+            S1 ->A1.I1,
+        S2->X1.I2,
+            S2 -> A1.I2,
+S3->X2.I2   ,
+S3->A2.I2,
     
-    MONITOR A1;
+            X1->X2.I1,
+            X1->  A2.I1,A1->O1.I1,A2->O1.I2 ;
+    
+    /* monitor particular signals */
+    MONITOR 
+    
+    
+    
+    X2, 
+            O1 ;
