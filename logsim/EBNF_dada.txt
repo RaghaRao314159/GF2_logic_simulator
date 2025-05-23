@@ -11,7 +11,7 @@ DEVICES D1:DTYPE,
         C1:CLOCK (PERIOD:8),
         S1:SWITCH (INITIAL:0), 
         S2:SWITCH (INITIAL:1),
-        S3 SWITCH (INITIAL:0) ;
+        S3:SWITCH (INITIAL:0) ;
 
 /* connect inputs and outputs */
 CONNECT S1->D1.SET,
@@ -59,6 +59,6 @@ CONNECT S1->X1.I1,
         A1->O1.I1,
         A2->O1.I2 ;
 
-/* monitor certain signals */
+/* monitor particular signals */
 MONITOR X2, 
         O1 ;
