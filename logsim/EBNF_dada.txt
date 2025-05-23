@@ -39,7 +39,7 @@ Example Two:
 DEVICES X1:XOR (IN:2),
         X2:XOR (IN:2),
         A1:AND (IN:2),
-        A1:AND (IN:2),
+        A2:AND (IN:2),
         O1:OR (IN:2),
         S1:SWITCH (INITIAL:1), 
         S2:SWITCH (INITIAL:1),
