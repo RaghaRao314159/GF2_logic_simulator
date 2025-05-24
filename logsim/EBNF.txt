@@ -2,7 +2,7 @@ specfile = {comment}, devices, {devices | connections | monitor | comment};
 
 
 
-devices =  "DEVICES", device, {",", device} ,  eol ;
+devices =  "DEVICES ", device, {",", device} ,  eol ;
 
 device = name,  ":",  devicetype, [ "(",  "IN",  ":",  number, ")"], [ "(",  "OUT",  ":",  number, ")"], [ "(",  "PERIOD",  ":",  number, ")"], [ "(",  "INITIAL",  ":",  bit, ")"]
 
