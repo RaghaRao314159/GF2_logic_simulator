@@ -4,7 +4,7 @@ import pytest
 from names import Names
 
 def test_lookup_adder():
-    #create empty names
+    # create class of empty names
     my_names = Names()
 
     # example cases
@@ -19,7 +19,7 @@ def test_lookup_adder():
     assert out == exp_out
 
 def test_lookup_flip_flop():
-    #create empty names
+    # create class of empty names
     my_names = Names()
 
     # example cases
@@ -34,7 +34,7 @@ def test_lookup_flip_flop():
     assert out == exp_out
 
 def test_lookup_empty():
-    #create empty names
+    # create class of empty names
     my_names = Names()
 
     # example cases
@@ -49,7 +49,7 @@ def test_lookup_empty():
     assert out == exp_out
 
 def test_query_adder():
-    # create empty names
+    # create class of empty names
     my_names = Names()
 
     # names from our full-adder circuit
@@ -63,10 +63,10 @@ def test_query_adder():
         assert my_names.query(name) == idx
 
 def test_query_flip_flop():
-    # create empty names
+    # create class of empty names
     my_names = Names()
 
-    # names from our full-adder circuit
+    # names from our d-type flip flop example
     names_list = ["D1", "D2", "N1", "C1", "S1", "S2", "S3"]
 
     # add these names into out names dictionary in my_names object
@@ -77,19 +77,60 @@ def test_query_flip_flop():
         assert my_names.query(name) == idx
 
 def test_query_nonexistent():
-    # create empty names
+    # create class of empty names
     my_names = Names()
 
-    # names from our full-adder circuit
+    # names from our adder circuit
     names_list = ["X1", "X2", "A1", "A2", "O1", "S1", "S2", "S3", "NO1"]
 
-    # add these names into out names dictionary in my_names object
+    # add names to dictionary of names in my_names object
     my_names.lookup(names_list)
 
     # assert the id of every name
-    assert my_names.query("D1")
+    assert my_names.query("D1") == None
 
-def test_get_name_string():
-    pass
+def test_get_name_string_adder():
+    # create class of empty names
+    my_names = Names()
+
+    # names from adder circuit example 
+    names_list = ["X1", "X2", "A1", "A2", "O1", "S1", "S2", "S3", "NO1"]
+
+    # add names to dictionary of names in my_names object
+    my_names.lookup(names_list)
+
+    # assert the name of every id
+    for idx, name in enumerate(names_list):
+        print(idx, name, my_names.get_name_string(idx))
+        assert my_names.get_name_string(idx) == name
+
+def test_get_name_string_flip_flop():
+    # create class of empty names
+    my_names = Names()
+
+    # names from d-type flip flop circuit example 
+    names_list = ["D1", "D2", "N1", "C1", "S1", "S2", "S3"]
+
+    # add names to dictionary of names in my_names object
+    my_names.lookup(names_list)
+
+    # assert the name of every id
+    for idx, name in enumerate(names_list):
+        assert my_names.get_name_string(idx) == name
+
+def test_get_name_string_nonexistent():
+    # create class of empty names
+    my_names = Names()
+
+    # names from our adder circuit
+    names_list = ["X1", "X2", "A1", "A2", "O1", "S1", "S2", "S3", "NO1"]
+
+    # add names to dictionary of names in my_names object
+    my_names.lookup(names_list)
+
+    nonexistent_idx = len(names_list) + 1
+
+    # assert the id of every name
+    assert my_names.get_name_string(nonexistent_idx) == None
 
 

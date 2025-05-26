@@ -102,5 +102,5 @@ class Names:
         # checks if name_id is in id dictionary
         # names_id doesn't exist so returns None
         # found the device so returns the ID
-        return self.names_id.get(name_id, None)
+        return self.id_names.get(name_id, None)
         
