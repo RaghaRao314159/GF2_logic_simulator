@@ -82,7 +82,7 @@ class Names:
             name_id = self.query(name_string)
 
             # check if name has an id
-            if not name_id:
+            if name_id == None:
                 name_id = self.num_items
                 self.id_names[self.num_items] = name_string
                 self.names_id[name_string] = self.num_items

@@ -3,22 +3,28 @@ import pytest
 
 from names import Names
 
-def test_lookup_adder():
+
+@pytest.fixture
+def adder():
     # create class of empty names
     my_names = Names()
 
-    # example case
     names_list = ["X1", "X2", "A1", "A2", "O1", "S1", "S2", "S3", "NO1"]
 
-    # lookup output
-    out = my_names.lookup(names_list)
+    idx_list = my_names.lookup(names_list)
+    
+    return my_names, names_list, idx_list
+
+def test_lookup_adder(adder):
+    # example case
+    (*_, idx_list) = adder
 
     # expected output
-    exp_out = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+    exp_idx_list = [0, 1, 2, 3, 4, 5, 6, 7, 8]
 
-    assert out == exp_out
+    assert idx_list == exp_idx_list
 
-def test_lookup_flip_flop():
+def test_lookup_flip_flop(adder):
     # create class of empty names
     my_names = Names()
 
@@ -26,12 +32,12 @@ def test_lookup_flip_flop():
     names_list = ["D1", "D2", "N1", "C1", "S1", "S2", "S3"]
 
     # lookup output
-    out = my_names.lookup(names_list)
+    idx_list = my_names.lookup(names_list)
 
     # expected output
-    exp_out = [0, 1, 2, 3, 4, 5, 6]
+    exp_idx_list = [0, 1, 2, 3, 4, 5, 6]
 
-    assert out == exp_out
+    assert idx_list == exp_idx_list
 
 def test_lookup_empty():
     # create class of empty names
@@ -41,12 +47,12 @@ def test_lookup_empty():
     names_list = []
 
     # lookup output
-    out = my_names.lookup(names_list)
+    idx_list = my_names.lookup(names_list)
 
     # expected output
-    exp_out = []
+    exp_idx_list = []
 
-    assert out == exp_out
+    assert idx_list == exp_idx_list
 
 def test_lookup_multiple_lists():
     # create class of empty names
