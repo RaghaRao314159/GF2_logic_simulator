@@ -59,8 +59,8 @@ def test_query_aadder():
     my_names.lookup(names_list)
 
     # assert the id of every name
-    for i,name in enumerate(names_list):
-        assert my_names.query(name) == i
+    for id, name in enumerate(names_list):
+        assert my_names.query(name) == id
 
 def test_query_flip_flop():
     # create empty names
@@ -73,8 +73,8 @@ def test_query_flip_flop():
     my_names.lookup(names_list)
 
     # assert the id of every name
-    for i,name in enumerate(names_list):
-        assert my_names.query(name) == i
+    for id, name in enumerate(names_list):
+        assert my_names.query(name) == id
 
 def test_query_nonexistent():
     # create empty names
@@ -84,7 +84,7 @@ def test_query_nonexistent():
     names_list = ["X1", "X2", "A1", "A2", "O1", "S1", "S2", "S3", "NO1"]
 
     # add these names into out names dictionary in my_names object
-    my_names.lookup(["X1", "X2", "A1", "A2", "O1", "S1", "S2", "S3", "NO1"])
+    my_names.lookup(names_list)
 
     # assert the id of every name
     my_names.query("D1") == None
