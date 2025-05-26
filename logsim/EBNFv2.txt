@@ -1,0 +1,41 @@
+specfile = devices, {devices | connection | monitor};
+
+
+
+devices =  "DEVICES ", device, {",", device} ,  eol ;
+
+device = name,  ":", ((("CLOCK" | "AND" | "NAND" | "OR" | "NOR"), " ", posnumber ) |  ("SWITCH", " ", bit) | ("DTYPE" | "XOR")) ; 
+
+
+
+connection =  "CONNECT ", con, { ",",  con},  eol ;
+
+con = signal,  "->",  signal
+
+signal = name, [".", pinname] ;
+
+pinname = numberedpin | fixedpin ;
+
+numberedpin = "I", ("1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "13" | "14" | "15" | "16") ;
+
+fixedpin = "DATA"| "CLK" | "SET" | "CLEAR" | "Q" | "QBAR" ;
+
+
+
+monitor =  "MONITOR ",  signal, { ",",  signal},  eol;
+
+
+
+name = letter, {letter | digit} ;
+
+eol = ";" ;
+
+letter = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z" | "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z" ;
+
+posnumber = posdigit, {digit} ;
+
+posdigit =  "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+
+digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+
+bit = "0" | "1" ;

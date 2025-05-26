@@ -65,12 +65,9 @@ class Names:
         If the name string is not present in the names list, return None.
         """
         # checks if name_string is in names list
-        if self.names_id.get(name_string, -1) == -1:
-            # names_string dpesnt exist so returns None
-            return None
-        
+        # names_string dpesnt exist so returns None
         # found the device so returns the ID
-        return self.names_id[name_string]
+        return self.names_id.get(name_string, None)
 
 
     def lookup(self, name_string_list):
