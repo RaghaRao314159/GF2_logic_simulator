@@ -33,6 +33,21 @@ def test_lookup_flip_flop():
 
     assert out == exp_out
 
+def test_lookup_empty():
+    #create empty names
+    my_names = Names()
+
+    # example cases
+    names_list = []
+
+    # lookup output
+    out = my_names.lookup(names_list)
+
+    # expected output
+    exp_out = []
+
+    assert out == exp_out
+
 def test_query():
     # create empty names
     my_names = Names()
