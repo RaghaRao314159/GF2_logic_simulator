@@ -79,8 +79,11 @@ class Names:
         If the name string is not present in the names list, add it.
         """
 
+
     def get_name_string(self, name_id):
         """Return the corresponding name string for name_id.
 
         If the name_id is not an index in the names list, return None.
         """
+        return self.names_id.get(name_id, None)
+        
