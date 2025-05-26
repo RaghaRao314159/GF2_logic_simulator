@@ -27,6 +27,8 @@ class Symbol:
         """Initialise symbol properties."""
         self.type = None
         self.id = None
+        self.line_number = None
+        self.position = None
 
 
 class Scanner:
@@ -51,6 +53,44 @@ class Scanner:
 
     def __init__(self, path, names):
         """Open specified file and initialise reserved words and IDs."""
+        self.names = names
+
+        self.symbol_type_list = [self.COMMA, self.SEMICOLON, self.COLON, self.ARROW,
+            self.KEYWORD, self.NUMBER, self.NAME, self.EOF] = range(7)
+        
+        self.keywords_list = ["DEVICES", "CONNECT", "MONITOR", "END"]
+
+        [self.DEVICES_ID, self.CONNECT_ID, self.MONITOR_ID,
+            self.END_ID] = self.names.lookup(self.keywords_list)
+        
+        self.current_character = ""
 
     def get_symbol(self):
         """Translate the next sequence of characters into a symbol."""
+
+        symbol = Symbol()
+        self.skip_spaces()  # current character now not whitespace
+        if self.current_character.isalpha():  # name
+            name_string = self.get_name()
+            if name_string in self.keywords_list:
+                symbol.type = self.KEYWORD
+            else:
+                symbol.type = self.NAME
+            [symbol.id] = self.names.lookup([name_string])
+        elif self.current_character.isdigit():  # number
+            symbol.id = self.get_number()
+            symbol.type = self.NUMBER
+        elif self.current_character == "=":  # punctuation
+            symbol.type = self.EQUALS
+            self.advance()
+        elif self.current_character == ",":
+            pass
+
+        # etc for other punctuation
+
+        elif self.current_character == "":  # end of file
+            symbol.type = self.EOF
+        else:  # not a valid character
+            self.advance()
+        
+        return symbol

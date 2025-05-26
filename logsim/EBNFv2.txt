@@ -1,4 +1,4 @@
-specfile = devices, {devices | connection | monitor};
+specfile = devices, {devices | connection | monitor}, end;
 
 
 
@@ -22,7 +22,11 @@ fixedpin = "DATA"| "CLK" | "SET" | "CLEAR" | "Q" | "QBAR" ;
 
 
 
-monitor =  "MONITOR ",  signal, { ",",  signal},  eol;
+monitor =  "MONITOR ",  signal, { ",",  signal},  eol ;
+
+
+
+end = "END", eol ;
 
 
 
