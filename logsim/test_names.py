@@ -55,7 +55,7 @@ def test_query_adder():
     # names from our full-adder circuit
     names_list = ["X1", "X2", "A1", "A2", "O1", "S1", "S2", "S3", "NO1"]
 
-    # add these names into names dictionary in my_names object
+    # add names to names dictionary in my_names object
     my_names.lookup(names_list)
 
     # assert the id of every name
@@ -69,7 +69,7 @@ def test_query_flip_flop():
     # names from our d-type flip flop example
     names_list = ["D1", "D2", "N1", "C1", "S1", "S2", "S3"]
 
-    # add these names into names dictionary in my_names object
+    # add names to names dictionary in my_names object
     my_names.lookup(names_list)
 
     # assert the id of every name
@@ -83,7 +83,7 @@ def test_query_nonexistent():
     # names from our adder circuit
     names_list = ["X1", "X2", "A1", "A2", "O1", "S1", "S2", "S3", "NO1"]
 
-    # add names to dictionary of names in my_names object
+    # add names to names dictionary in my_names object
     my_names.lookup(names_list)
 
     # assert the id of every name
@@ -96,7 +96,7 @@ def test_get_name_string_adder():
     # names from adder circuit example 
     names_list = ["X1", "X2", "A1", "A2", "O1", "S1", "S2", "S3", "NO1"]
 
-    # add names to dictionary of names in my_names object
+    # add names to names dictionary in my_names object
     my_names.lookup(names_list)
 
     # assert the name of every id
@@ -111,7 +111,7 @@ def test_get_name_string_flip_flop():
     # names from d-type flip flop circuit example 
     names_list = ["D1", "D2", "N1", "C1", "S1", "S2", "S3"]
 
-    # add names to dictionary of names in my_names object
+    # add names to names dictionary in my_names object
     my_names.lookup(names_list)
 
     # assert the name of every id
