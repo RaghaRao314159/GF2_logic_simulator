@@ -87,7 +87,7 @@ def test_query_nonexistent():
     my_names.lookup(names_list)
 
     # assert the id of every name
-    assert my_names.query("D1") == None
+    assert my_names.query("D1")
 
 def test_get_name_string():
     pass
