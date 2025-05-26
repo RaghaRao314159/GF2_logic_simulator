@@ -42,6 +42,15 @@ class Names:
         """Initialise names list."""
         self.error_code_count = 0  # how many error codes have been declared
 
+        # hash map where IDs are keys and name strings are values
+        self.id_names = {}
+
+        # hash map where name strings are keys and IDs are values
+        self.names_id = {}
+
+        # number of names stored
+        self.numitems = 0
+
     def unique_error_codes(self, num_error_codes):
         """Return a list of unique integer error codes."""
         if not isinstance(num_error_codes, int):
@@ -55,6 +64,14 @@ class Names:
 
         If the name string is not present in the names list, return None.
         """
+        # checks if name_string is in names list
+        if self.names_id.get(name_string, -1) == -1:
+            # names_string dpesnt exist so returns None
+            return None
+        
+        # found the device so returns the ID
+        return self.names_id[name_string]
+
 
     def lookup(self, name_string_list):
         """Return a list of name IDs for each name string in name_string_list.
