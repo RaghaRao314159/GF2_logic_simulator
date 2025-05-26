@@ -48,7 +48,35 @@ def test_lookup_empty():
 
     assert out == exp_out
 
-def test_query():
+def test_query_aadder():
+    # create empty names
+    my_names = Names()
+
+    # names from our full-adder circuit
+    names_list = ["X1", "X2", "A1", "A2", "O1", "S1", "S2", "S3", "NO1"]
+
+    # add these names into out names dictionary in my_names object
+    my_names.lookup(names_list)
+
+    # assert the id of every name
+    for i,name in enumerate(names_list):
+        assert my_names.query(name) == i
+
+def test_query_flip_flop():
+    # create empty names
+    my_names = Names()
+
+    # names from our full-adder circuit
+    names_list = ["D1", "D2", "N1", "C1", "S1", "S2", "S3"]
+
+    # add these names into out names dictionary in my_names object
+    my_names.lookup(names_list)
+
+    # assert the id of every name
+    for i,name in enumerate(names_list):
+        assert my_names.query(name) == i
+
+def test_query_nonexistent():
     # create empty names
     my_names = Names()
 
@@ -59,9 +87,7 @@ def test_query():
     my_names.lookup(["X1", "X2", "A1", "A2", "O1", "S1", "S2", "S3", "NO1"])
 
     # assert the id of every name
-    for i,name in enumerate(names_list):
-        assert my_names.query(name) == i
-
+    my_names.query("D1") == None
 
 def test_get_name_string():
     pass
