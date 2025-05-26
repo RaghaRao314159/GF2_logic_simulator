@@ -59,8 +59,8 @@ def test_query_adder():
     my_names.lookup(names_list)
 
     # assert the id of every name
-    for id, name in enumerate(names_list):
-        assert my_names.query(name) == id
+    for idx, name in enumerate(names_list):
+        assert my_names.query(name) == idx
 
 def test_query_flip_flop():
     # create empty names
@@ -73,8 +73,8 @@ def test_query_flip_flop():
     my_names.lookup(names_list)
 
     # assert the id of every name
-    for id, name in enumerate(names_list):
-        assert my_names.query(name) == id
+    for idx, name in enumerate(names_list):
+        assert my_names.query(name) == idx
 
 def test_query_nonexistent():
     # create empty names
