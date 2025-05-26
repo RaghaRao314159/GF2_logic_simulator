@@ -7,7 +7,7 @@ def test_lookup_adder():
     # create class of empty names
     my_names = Names()
 
-    # example cases
+    # example case
     names_list = ["X1", "X2", "A1", "A2", "O1", "S1", "S2", "S3", "NO1"]
 
     # lookup output
@@ -22,7 +22,7 @@ def test_lookup_flip_flop():
     # create class of empty names
     my_names = Names()
 
-    # example cases
+    # example case
     names_list = ["D1", "D2", "N1", "C1", "S1", "S2", "S3"]
 
     # lookup output
@@ -37,7 +37,7 @@ def test_lookup_empty():
     # create class of empty names
     my_names = Names()
 
-    # example cases
+    # example case
     names_list = []
 
     # lookup output
@@ -52,7 +52,7 @@ def test_query_adder():
     # create class of empty names
     my_names = Names()
 
-    # names from our full-adder circuit
+    # names from full-adder circuit example
     names_list = ["X1", "X2", "A1", "A2", "O1", "S1", "S2", "S3", "NO1"]
 
     # add names to names dictionary in my_names object
