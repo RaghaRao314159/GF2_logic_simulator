@@ -49,7 +49,7 @@ class Names:
         self.names_id = {}
 
         # number of names stored
-        self.numitems = 0
+        self.num_items = 0
 
     def unique_error_codes(self, num_error_codes):
         """Return a list of unique integer error codes."""
@@ -64,17 +64,34 @@ class Names:
 
         If the name string is not present in the names list, return None.
         """
-        # checks if name_string is in names list
-        # names_string dpesnt exist so returns None
+        # checks if name_string is in names dictionary
+        # names_string doesn't exist so returns None
         # found the device so returns the ID
         return self.names_id.get(name_string, None)
-
 
     def lookup(self, name_string_list):
         """Return a list of name IDs for each name string in name_string_list.
 
         If the name string is not present in the names list, add it.
         """
+        # create list for name ids
+        names_id_list = []
+
+        # loop for names in names list
+        for name_string in name_string_list:
+            name_id = self.query(name_string)
+
+            # check if name has an id
+            if not name_id:
+                name_id = self.num_items
+                self.id_names[self.num_items] = name_string
+                self.names_id[name_string] = self.num_items
+                self.num_items += 1
+
+            # add name id to list
+            names_id_list.append(name_id)
+
+        return names_id_list
 
 
     def get_name_string(self, name_id):
@@ -82,5 +99,8 @@ class Names:
 
         If the name_id is not an index in the names list, return None.
         """
+        # checks if name_id is in id dictionary
+        # names_id doesn't exist so returns None
+        # found the device so returns the ID
         return self.names_id.get(name_id, None)
         
