@@ -48,7 +48,7 @@ def test_lookup_empty():
 
     assert out == exp_out
 
-def test_query_aadder():
+def test_query_adder():
     # create empty names
     my_names = Names()
 
@@ -87,7 +87,7 @@ def test_query_nonexistent():
     my_names.lookup(names_list)
 
     # assert the id of every name
-    my_names.query("D1") == None
+    assert my_names.query("D1") == None
 
 def test_get_name_string():
     pass
