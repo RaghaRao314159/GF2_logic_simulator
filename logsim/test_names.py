@@ -48,6 +48,17 @@ def test_lookup_empty():
 
     assert out == exp_out
 
+def test_lookup_multiple_lists():
+    # create class of empty names
+    my_names = Names()
+
+    # example case
+    names_list = ["X1", "X2", "A1", "A2", "O1", "S1", "S2", "S3", "NO1"]
+
+    # lookup for each case individually
+    for idx, name in enumerate(names_list):
+        assert [idx] == my_names.lookup([name])
+
 def test_query_adder():
     # create class of empty names
     my_names = Names()
