@@ -81,14 +81,14 @@ class Scanner:
         if self.current_character.isalpha():  # name
             name_string = self.get_name()
 
-            if name_string in self.keywords_list:
+            if name_string in self.keywords_list: # name is a keyword
                 symbol.type = self.KEYWORD
 
             else:
-                symbol.type = self.NAME
+                symbol.type = self.NAME # name is a user-defined name
             [symbol.id] = self.names.lookup([name_string])
 
-        elif self.current_character == "\n":
+        elif self.current_character == "\n": # new line
             symbol.line_number += 1
             self.position = 0
             self.advance()
@@ -97,7 +97,7 @@ class Scanner:
             symbol.id = self.get_number()
             symbol.type = self.NUMBER
 
-        elif self.current_character == ";":  # signal->signal
+        elif self.current_character == ";": # end of executable
             symbol.type = self.SEMICOLON
             self.advance()
 
@@ -105,11 +105,11 @@ class Scanner:
             symbol.type = self.ARROW
             self.advance()
 
-        elif self.current_character == ",":
+        elif self.current_character == ",": # used for listing
             symbol.type = self.COMMA
             self.advance()
 
-        elif self.current_character == ":":
+        elif self.current_character == ":": # decive type
             symbol.type = self.COLON
             self.advance()
 
@@ -148,16 +148,19 @@ class Scanner:
         return int(num_str)
     
     def advance(self):
+        """Move to next character."""
         # sets the current character and moves on to next character
         self.position += 1
         self.current_character = self.FILE.read(1)
 
     def skip_spaces(self):
+        """Skip whitespace characters."""
         # skip whise cpaces and tabs until non white space or tab
         while self.current_character in [" ", "\t"]:
             self.advance()
     
     def print_error(self, symbol):
+        "Print an error message with the symbol's line number and position."
         # dictionary of lines
         lines = self.FILE.readlines()
         if 1 <= symbol.line_number <= len(lines):
