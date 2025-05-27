@@ -73,25 +73,23 @@ class Scanner:
             self.I14_ID, self.I15_ID, self.I16_ID] = self.names.lookup(self.keywords_list)
 
         self.position = 0
-
+        self.line_number = 0
         self.FILE = open(path, 'r')
 
         self.current_character = "" 
         self.advance()
 
+
     def get_symbol(self):
         """Translate the next sequence of characters into a symbol."""
 
         symbol = Symbol()
-        # self.advance()
-
-        print("first char", self.current_character)
         self.skip_spaces()  # current character now not whitespace
-        symbol.position = self.position
-
+        symbol.position += self.position-1
 
         if self.current_character.isalpha():  # name
             name_string = self.get_name()
+            print ('I detected a letter', name_string, symbol.position)
 
             if name_string in self.keywords_list: # name is a keyword
                 symbol.type = self.KEYWORD
@@ -101,9 +99,10 @@ class Scanner:
             [symbol.id] = self.names.lookup([name_string])
 
         elif self.current_character == "\n": # new line
-            symbol.line_number += 1
+            self.line_number += 1
             self.position = 0
             self.advance()
+            self.get_symbol() 
 
         elif self.current_character.isdigit():  # number
             symbol.id = self.get_number()
@@ -121,7 +120,7 @@ class Scanner:
             symbol.type = self.COMMA
             self.advance()
 
-        elif self.current_character == ":": # decive type
+        elif self.current_character == ":": # device type
             symbol.type = self.COLON
             self.advance()
 
@@ -137,6 +136,8 @@ class Scanner:
                     self.position = 0
                 self.advance()
             self.advance()
+            self.get_symbol() 
+            print (self.current_character=='\n', "We re here")
 
         elif self.current_character == "#":
             while not self.advance() and self.current_character != "\n":
@@ -145,6 +146,7 @@ class Scanner:
         else:  # not a valid character
             self.advance()
 
+        symbol.line_number = self.line_number
         return symbol
 
     def get_name(self):
@@ -180,8 +182,11 @@ class Scanner:
 
     def skip_spaces(self):
         """Skip whitespace characters."""
-        # skip whise cpaces and tabs until non white space or tab
-        while self.current_character in [" ", "\t"]:
+        # skip white spaces and tabs until non white space or tab
+        if self.current_character=='\n': #isspace includes checking for newline but this is treated differently from space and tab
+            pass
+            print ('here')
+        elif self.current_character.isspace():
             self.advance()
     
     def print_error(self, symbol):

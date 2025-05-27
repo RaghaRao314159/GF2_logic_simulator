@@ -30,19 +30,25 @@ def test_lookup_adder(adder):
     # expected output
     # convert self.FILE, while is a python file object to string using read
 
-
-    # exp_string = adder.FILE.read(1)
-
-    # print(exp_string)
-    print("HELKLO WORLD")
-
     symbol = adder.get_symbol()
-    symbol = adder.get_symbol()
-    symbol = adder.get_symbol()
+    with open(os.path.join(os.path.dirname(__file__), "test_adder.txt")) as f:
+        l = [line.rstrip() for line in f]
+        l = [x for x in l if x.strip()]
 
-    print(symbol.line_number, symbol.position)
+    print (symbol.line_number, symbol.position)
+    # symbol position defined as starting at 1 not zero 
+    assert l[symbol.line_number][symbol.position] == 'D'
 
-    assert 1 == 1
+    #print('one',l[symbol.line_number][symbol.position], 'two')
+    # s=True
+    # i=0
+    # while s == True:
+    #     print(f'{i}th time')
+    #     nam = f'symbol_{i}'
+    #     nam = adder.get_symbol()
+    #     print(nam.line_number, nam.position, nam.current_character)
+    #     i+=1
+
 
 
 
