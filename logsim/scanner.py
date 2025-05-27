@@ -117,6 +117,17 @@ class Scanner:
             symbol.type = self.EOF
             self.FILE.close()
 
+        elif self.current_character == "@":
+            while not self.advance() and self.current_character != "@":
+                if self.current_character == "\n":
+                    symbol.line_number += 1
+                    self.position = 0
+            self.advance()
+
+        elif self.current_character == "#":
+            while not self.advance() and self.current_character != "\n":
+                pass
+
         else:  # not a valid character
             self.advance()
         

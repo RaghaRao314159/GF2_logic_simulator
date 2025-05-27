@@ -1,9 +1,9 @@
 Example One:
-/* 
-    Name the gates, switches and clocks. 
+@
+    Name the gates, switches and clocks.
     Number of inputs and outputs
-    does not need to be defined for DTYPE 
-*/  
+    does not need to be defined for DTYPE
+@
 
 DEVICES D1:DTYPE,
         D2:DTYPE,
@@ -13,7 +13,7 @@ DEVICES D1:DTYPE,
         S2:SWITCH 1,
         S3:SWITCH 0 ;
 
-/* connect inputs and outputs */
+@ connect inputs and outputs @
 CONNECT S1 > D1.SET,
         S1 > D2.SET,
         S2 > D1.DATA,
@@ -27,7 +27,7 @@ CONNECT S1 > D1.SET,
         D2.Q > N1.I1,
         D2.QBAR > N1.I2,
 
-/* monitor certain signals */
+@ monitor certain signals @
 MONITOR D1.QBAR, 
         N1 ;
 
@@ -35,10 +35,10 @@ END
 
 Example Two:
 
-/* This configuration is a full-adder */
+@ This configuration is a full-adder @
 -----------------------------------------
 
-/* name all devices */
+@ name all devices @
 DEVICES X1:XOR,
         X2:XOR,
         A1:AND 2,
@@ -49,7 +49,7 @@ DEVICES X1:XOR,
         S2:SWITCH 1,
         S3 SWITCH 0 ;
 
-/* connect inputs and outputs */
+@ connect inputs and outputs @
 CONNECT S1 > X1.I1,
         S1 > A1.I1,
         S2 > X1.I2,
@@ -66,7 +66,7 @@ CONNECT S1 > X1.I1,
         
         O1 > NO1.I2 ;
 
-/* monitor particular signals */
+@ monitor particular signals @
 MONITOR X2, 
         O1,
         NO1 ;
@@ -75,10 +75,10 @@ END
 
 Example Three:
 
-/* This code is an extreme example to showcase the 
+@ This code is an extreme example to showcase the
 free-form nature of the language. 
 
-Deprecated since feedback from Interim Report One*/
+Deprecated since feedback from Interim Report One @
 -----------------------------------------------------
 
     /* name all                   devices */

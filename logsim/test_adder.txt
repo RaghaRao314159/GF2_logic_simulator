@@ -1,6 +1,6 @@
-/* This configuration is a full-adder */
+@ This configuration is a full-adder @
 
-/* name all devices */
+@ name all devices @
 DEVICES X1:XOR,
         X2:XOR,
         A1:AND 2,
@@ -11,7 +11,7 @@ DEVICES X1:XOR,
         S2:SWITCH 1,
         S3 SWITCH 0 ;
 
-/* connect inputs and outputs */
+@ connect inputs and outputs @
 CONNECT S1 > X1.I1,
         S1 > A1.I1,
         S2 > X1.I2,
@@ -28,9 +28,9 @@ CONNECT S1 > X1.I1,
         
         O1 > NO1.I2 ;
 
-/* monitor particular signals */
-MONITOR X2, 
-        O1,
+@ monitor particular signals @
+MONITOR X2, # this is the summer bit
+        O1, # this is the carry bit
         NO1 ;
 
 END 
