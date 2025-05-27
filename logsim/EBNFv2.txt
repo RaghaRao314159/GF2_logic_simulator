@@ -26,7 +26,7 @@ monitor =  "MONITOR ",  signal, { ",",  signal},  eol ;
 
 
 
-end = "END", eol ;
+end = "END" ;
 
 
 
