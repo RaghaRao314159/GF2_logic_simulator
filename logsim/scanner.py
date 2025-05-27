@@ -58,7 +58,9 @@ class Scanner:
         self.symbol_type_list = [self.COMMA, self.SEMICOLON, self.COLON, self.ARROW,
             self.KEYWORD, self.NUMBER, self.NAME, self.EOF] = range(7)
         
-        self.keywords_list = ["DEVICES", "CONNECT", "MONITOR", "END"]
+        self.keywords_list = ["DEVICES", "CONNECT", "MONITOR", "END", "CLOCK", "SWITCH", "AND", "NAND", "OR", "NOR",
+                              "XOR", "DTYPE", "DATA", "CLK", "SET", "CLEAR", "Q", "QBAR", "I1", "I2", "I3", "I4", "I5",
+                              "I6", "I7", "I8", "I9", "I10", "I11", "I12", "I13", "I14", "I15", "I16"]
 
         [self.DEVICES_ID, self.CONNECT_ID, self.MONITOR_ID,
             self.END_ID] = self.names.lookup(self.keywords_list)
