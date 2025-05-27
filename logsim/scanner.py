@@ -156,5 +156,14 @@ class Scanner:
         # skip whise cpaces and tabs until non white space or tab
         while self.current_character in [" ", "\t"]:
             self.advance()
+    
+    def print_error(self, symbol):
+        # dictionary of lines
+        lines = self.FILE.readlines()
+        if 1 <= symbol.line_number <= len(lines):
+            print(lines[symbol.line_number - 1])  # line_number is 1-based
+            print(" " * (symbol.position - 1), "^") # caret
+        else:
+            print("Line number out of range.")
         
           
