@@ -123,4 +123,3 @@ def test_get_name_string_nonexistent(adder):
     # assert the id of every name
     assert my_names.get_name_string(nonexistent_idx) == None
 
-

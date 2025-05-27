@@ -82,11 +82,16 @@ class Scanner:
         elif self.current_character.isdigit():  # number
             symbol.id = self.get_number()
             symbol.type = self.NUMBER
-        elif self.current_character == "=":  # punctuation
-            symbol.type = self.EQUALS
+        elif self.current_character == "->":  # signal->signal
+            symbol.type = self.ARROW
             self.advance()
         elif self.current_character == ",":
-            pass
+            symbol.type = self.COMMA
+            self.advance()
+        elif self.current_character == ":":
+            symbol.type = self.COLON
+            self.advance()
+
 
         # etc for other punctuation
 
