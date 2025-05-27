@@ -67,6 +67,8 @@ class Scanner:
         
         self.current_character = ""
 
+        self.FILE = open(path, 'r')
+
     def get_symbol(self):
         """Translate the next sequence of characters into a symbol."""
 
@@ -74,26 +76,34 @@ class Scanner:
         self.skip_spaces()  # current character now not whitespace
         if self.current_character.isalpha():  # name
             name_string = self.get_name()
+
             if name_string in self.keywords_list:
                 symbol.type = self.KEYWORD
+
             else:
                 symbol.type = self.NAME
             [symbol.id] = self.names.lookup([name_string])
+
         elif self.current_character.isdigit():  # number
             symbol.id = self.get_number()
             symbol.type = self.NUMBER
+
         elif self.current_character == "->":  # signal->signal
             symbol.type = self.ARROW
             self.advance()
+
         elif self.current_character == ",":
             symbol.type = self.COMMA
             self.advance()
+
         elif self.current_character == ":":
             symbol.type = self.COLON
             self.advance()
 
         elif self.current_character == "":  # end of file
             symbol.type = self.EOF
+            self.FILE.close()
+
         else:  # not a valid character
             self.advance()
         
@@ -123,3 +133,7 @@ class Scanner:
             self.advance()
 
         return int(num_str)
+    
+    def advance(self):
+        # sets the current character and moves on to next character
+        self.character = self.FILE.read(1)
