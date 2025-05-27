@@ -27,8 +27,8 @@ class Symbol:
         """Initialise symbol properties."""
         self.type = None
         self.id = None
-        self.line_number = None
-        self.position = None
+        self.line_number = 1
+        self.position = 1
 
 
 class Scanner:
@@ -67,6 +67,8 @@ class Scanner:
         
         self.current_character = ""
 
+        self.position = 1
+
         self.FILE = open(path, 'r')
 
     def get_symbol(self):
@@ -74,6 +76,8 @@ class Scanner:
 
         symbol = Symbol()
         self.skip_spaces()  # current character now not whitespace
+        symbol.position = self.position
+
         if self.current_character.isalpha():  # name
             name_string = self.get_name()
 
@@ -84,11 +88,20 @@ class Scanner:
                 symbol.type = self.NAME
             [symbol.id] = self.names.lookup([name_string])
 
+        elif self.current_character == "\n":
+            symbol.line_number += 1
+            self.position = 0
+            self.advance()
+
         elif self.current_character.isdigit():  # number
             symbol.id = self.get_number()
             symbol.type = self.NUMBER
 
-        elif self.current_character == "->":  # signal->signal
+        elif self.current_character == ";":  # signal->signal
+            symbol.type = self.SEMICOLON
+            self.advance()
+
+        elif self.current_character == ">":  # signal>signal
             symbol.type = self.ARROW
             self.advance()
 
@@ -136,6 +149,7 @@ class Scanner:
     
     def advance(self):
         # sets the current character and moves on to next character
+        self.position += 1
         self.current_character = self.FILE.read(1)
 
     def skip_spaces(self):
