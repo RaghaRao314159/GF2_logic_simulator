@@ -92,12 +92,21 @@ class Scanner:
             symbol.type = self.COLON
             self.advance()
 
-
-        # etc for other punctuation
-
         elif self.current_character == "":  # end of file
             symbol.type = self.EOF
         else:  # not a valid character
             self.advance()
         
         return symbol
+
+    def get_name(self):
+        """Seek the next name string in input_file.
+        Return the name string (or None) and the next non-alphanumeric character.
+        """
+        name_str = ''
+
+        while len(self.current_character) > 0 and self.current_character.isalnum():
+            name_str += self.current_character
+            self.advance()
+        
+        return name_str
