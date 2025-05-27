@@ -136,4 +136,11 @@ class Scanner:
     
     def advance(self):
         # sets the current character and moves on to next character
-        self.character = self.FILE.read(1)
+        self.current_character = self.FILE.read(1)
+
+    def skip_spaces(self):
+        # skip whise cpaces and tabs until non white space or tab
+        while self.current_character in [" ", "\t"]:
+            self.advance()
+        
+          
