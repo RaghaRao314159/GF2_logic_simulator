@@ -110,3 +110,16 @@ class Scanner:
             self.advance()
         
         return name_str
+
+    def get_number(self):
+        """Seek the next number in input_file.
+
+        Return the number (or None) and the next non-numeric character.
+        """
+        num_str = ''
+
+        while self.current_character.isdigit():
+            num_str += self.current_character
+            self.advance()
+
+        return int(num_str)
