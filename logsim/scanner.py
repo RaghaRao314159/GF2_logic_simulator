@@ -56,27 +56,39 @@ class Scanner:
         self.names = names
 
         self.symbol_type_list = [self.COMMA, self.SEMICOLON, self.COLON, self.ARROW,
-            self.KEYWORD, self.NUMBER, self.NAME, self.EOF] = range(7)
+            self.KEYWORD, self.NUMBER, self.NAME, self.EOF] = range(8)
         
         self.keywords_list = ["DEVICES", "CONNECT", "MONITOR", "END", "CLOCK", "SWITCH", "AND", "NAND", "OR", "NOR",
                               "XOR", "DTYPE", "DATA", "CLK", "SET", "CLEAR", "Q", "QBAR", "I1", "I2", "I3", "I4", "I5",
                               "I6", "I7", "I8", "I9", "I10", "I11", "I12", "I13", "I14", "I15", "I16"]
 
         [self.DEVICES_ID, self.CONNECT_ID, self.MONITOR_ID,
-            self.END_ID] = self.names.lookup(self.keywords_list)
-        
-        self.current_character = ""
+            self.END_ID, self.CLOCK_ID, self.SWITCH_ID, self.AND_ID,
+            self.NAND_ID, self.OR_ID, self.NOR_ID, self.XOR_ID,
+            self.DTYPE_ID, self.DATA_ID, self.CLK_ID, self.SET_ID,
+            self.CLEAR_ID, self.Q_ID, self.QBAR_ID, self.I1_ID,
+            self.I2_ID, self.I3_ID, self.I4_ID, self.I5_ID,
+            self.I6_ID, self.I7_ID, self.I8_ID, self.I9_ID,
+            self.I10_ID, self.I11_ID, self.I12_ID, self.I13_ID,
+            self.I14_ID, self.I15_ID, self.I16_ID] = self.names.lookup(self.keywords_list)
 
-        self.position = 1
+        self.position = 0
 
         self.FILE = open(path, 'r')
+
+        self.current_character = "" 
+        self.advance()
 
     def get_symbol(self):
         """Translate the next sequence of characters into a symbol."""
 
         symbol = Symbol()
+        # self.advance()
+
+        print("first char", self.current_character)
         self.skip_spaces()  # current character now not whitespace
         symbol.position = self.position
+
 
         if self.current_character.isalpha():  # name
             name_string = self.get_name()
@@ -118,10 +130,12 @@ class Scanner:
             self.FILE.close()
 
         elif self.current_character == "@":
-            while not self.advance() and self.current_character != "@":
+            self.advance()
+            while self.current_character != "@":
                 if self.current_character == "\n":
                     symbol.line_number += 1
                     self.position = 0
+                self.advance()
             self.advance()
 
         elif self.current_character == "#":
@@ -130,7 +144,7 @@ class Scanner:
 
         else:  # not a valid character
             self.advance()
-        
+
         return symbol
 
     def get_name(self):
