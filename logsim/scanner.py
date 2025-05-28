@@ -106,9 +106,6 @@ class Scanner:
                 self.position = 0
                 self.advance()
 
-        symbol.position = self.position
-        symbol.line_number = self.line_number
-
 
         if self.current_character.isalpha():  # name
             name_string = self.get_name()
@@ -151,6 +148,9 @@ class Scanner:
         else:  # not a valid character
             self.advance()
 
+        symbol.position = self.position
+        symbol.line_number = self.line_number
+        
         return symbol
 
     def get_name(self):
