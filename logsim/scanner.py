@@ -55,8 +55,8 @@ class Scanner:
         """Open specified file and initialise reserved words and IDs."""
         self.names = names
 
-        self.symbol_type_list = [self.COMMA, self.SEMICOLON, self.COLON, self.ARROW,
-            self.KEYWORD, self.NUMBER, self.NAME, self.EOF] = range(8)
+        self.symbol_type_list = [self.COMMA, self.SEMICOLON, self.COLON, self.ARROW, self.DOT,
+            self.KEYWORD, self.NUMBER, self.NAME, self.EOF] = range(9)
         
         self.keywords_list = ["DEVICES", "CONNECT", "MONITOR", "END", "CLOCK", "SWITCH", "AND", "NAND", "OR", "NOR",
                               "XOR", "DTYPE", "DATA", "CLK", "SET", "CLEAR", "Q", "QBAR", "I1", "I2", "I3", "I4", "I5",
@@ -73,6 +73,7 @@ class Scanner:
             self.I14_ID, self.I15_ID, self.I16_ID] = self.names.lookup(self.keywords_list)
 
         self.position = 0
+        self.line_number = 1
 
         self.FILE = open(path, 'r')
 
@@ -83,11 +84,30 @@ class Scanner:
         """Translate the next sequence of characters into a symbol."""
 
         symbol = Symbol()
-        # self.advance()
 
-        print("first char", self.current_character)
         self.skip_spaces()  # current character now not whitespace
+
+        while self.current_character in ["@", "#", "\n"]:
+            if self.current_character == "@":
+                self.advance()
+                while self.current_character != "@":
+                    if self.current_character == "\n":
+                        self.line_number += 1
+                        self.position = 0
+                    self.advance()
+                self.advance()
+            
+            elif self.current_character == "#":
+                while self.current_character != "\n":
+                    self.advance()
+            
+            elif self.current_character == "\n": # new line
+                self.line_number += 1
+                self.position = 0
+                self.advance()
+
         symbol.position = self.position
+        symbol.line_number = self.line_number
 
 
         if self.current_character.isalpha():  # name
@@ -99,11 +119,6 @@ class Scanner:
             else:
                 symbol.type = self.NAME # name is a user-defined name
             [symbol.id] = self.names.lookup([name_string])
-
-        elif self.current_character == "\n": # new line
-            symbol.line_number += 1
-            self.position = 0
-            self.advance()
 
         elif self.current_character.isdigit():  # number
             symbol.id = self.get_number()
@@ -124,23 +139,14 @@ class Scanner:
         elif self.current_character == ":": # decive type
             symbol.type = self.COLON
             self.advance()
+        
+        elif self.current_character == ".": # decive type
+            symbol.type = self.DOT
+            self.advance()
 
         elif self.current_character == "":  # end of file
             symbol.type = self.EOF
             self.FILE.close()
-
-        elif self.current_character == "@":
-            self.advance()
-            while self.current_character != "@":
-                if self.current_character == "\n":
-                    symbol.line_number += 1
-                    self.position = 0
-                self.advance()
-            self.advance()
-
-        elif self.current_character == "#":
-            while not self.advance() and self.current_character != "\n":
-                pass
 
         else:  # not a valid character
             self.advance()
@@ -156,7 +162,7 @@ class Scanner:
         while len(self.current_character) > 0 and self.current_character.isalnum():
             name_str += self.current_character
             self.advance()
-        
+
         return name_str
 
     def get_number(self):
@@ -183,6 +189,9 @@ class Scanner:
         # skip whise cpaces and tabs until non white space or tab
         while self.current_character in [" ", "\t"]:
             self.advance()
+            # tab is 4 spaces, 1 pos is added in advance, 3 more added here
+            if self.current_character == "\t":
+                self.position += 3
     
     def print_error(self, symbol):
         "Print an error message with the symbol's line number and position."

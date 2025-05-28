@@ -31,19 +31,73 @@ def test_lookup_adder(adder):
     # convert self.FILE, while is a python file object to string using read
 
 
-    # exp_string = adder.FILE.read(1)
-
-    # print(exp_string)
-    print("HELKLO WORLD")
+    exp_words_numbers = [
+        'DEVICES', 'X1', 'XOR', 'X2', 'XOR', 'A1', 'AND', 2, 'A2', 'AND', 2, 
+        'NO1', 'NOR', 2, 'O1', 'OR', 2, 'S1', 'SWITCH', 1, 'S2', 'SWITCH', 1, 
+        'S3', 'SWITCH', 0, 'CONNECT', 'S1', 'X1', 'I1', 'S1', 'A1', 'I1', 'S2', 
+        'X1', 'I2', 'S2', 'A1', 'I2', 'S3', 'X2', 'I2', 'S3', 'A2', 'I2', 'X1', 
+        'X2', 'I1', 'X1', 'A2', 'I1', 'X2', 'NO1', 'I1', 'A1', 'O1', 'I1', 'A2', 
+        'O1', 'I2', 'O1', 'NO1', 'I2', 'MONITOR', 'X2', 'O1', 'NO1', 'END'
+    ]
 
     symbol = adder.get_symbol()
-    symbol = adder.get_symbol()
-    symbol = adder.get_symbol()
+    
+    words_numbers = []
 
-    print(symbol.line_number, symbol.position)
+    while symbol.type != 8:
+        if (symbol.type in [5, 7]):
+            # name or keyword
+            # print(adder.names.get_name_string(symbol.id), end = " ")
+            words_numbers.append(adder.names.get_name_string(symbol.id))
 
-    assert 1 == 1
+        elif symbol.type == 6:
+            # number
+            # print(symbol.id, end = " ")
+            words_numbers.append(symbol.id)
+
+        symbol = adder.get_symbol()
+
+    # test key words
+
+    assert words_numbers == exp_words_numbers
 
 
+def test_lookup_flip_flop(flip_flop):
+    # example case
+
+    # expected output
+    # convert self.FILE, while is a python file object to string using read
 
 
+    exp_words_numbers = [
+        'DEVICES', 'D1', 'DTYPE', 'D2', 'DTYPE', 'N1', 'NAND', 2, 'C1', 'CLOCK', 8,
+        'S1', 'SWITCH', 0, 'S2', 'SWITCH', 1, 'S3', 'SWITCH', 0,
+        'CONNECT', 'S1', 'D1', 'SET', 'S1', 'D2', 'SET',
+        'S2', 'D1', 'DATA', 'S3', 'D1', 'CLEAR', 'S3', 'D2', 'CLEAR',
+        'C1', 'D1', 'CLK', 'C1', 'D2', 'CLK',
+        'D1', 'Q', 'D2', 'DATA', 'D2', 'Q', 'N1', 'I1', 'D2', 'QBAR', 'N1', 'I2',
+        'MONITOR', 'D1', 'QBAR', 'N1',
+        'END'
+    ]
+
+
+    symbol = flip_flop.get_symbol()
+    
+    words_numbers = []
+
+    while symbol.type != 8:
+        if (symbol.type in [5, 7]):
+            # name or keyword
+            # print(flip_flop.names.get_name_string(symbol.id), end = " ")
+            words_numbers.append(flip_flop.names.get_name_string(symbol.id))
+
+        elif symbol.type == 6:
+            # number
+            # print(symbol.id, end = " ")
+            words_numbers.append(symbol.id)
+
+        symbol = flip_flop.get_symbol()
+
+    # test key words
+
+    assert words_numbers == exp_words_numbers
