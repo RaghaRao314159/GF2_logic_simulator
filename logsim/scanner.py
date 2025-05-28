@@ -186,7 +186,7 @@ class Scanner:
 
     def skip_spaces(self):
         """Skip whitespace characters."""
-        # skip whise cpaces and tabs until non white space or tab
+        # skip white spaces and tabs until non white space or tab
         while self.current_character in [" ", "\t"]:
             self.advance()
             # tab is 4 spaces, 1 pos is added in advance, 3 more added here
