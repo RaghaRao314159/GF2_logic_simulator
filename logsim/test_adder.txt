@@ -1,7 +1,8 @@
 @ This configuration is a full-adder @
 
+
 @ name all devices @
-DEVICES X1:XOR,
+ DEVICES X1:XOR,
         X2:XOR,
         A1:AND 2,
         A2:AND 2,

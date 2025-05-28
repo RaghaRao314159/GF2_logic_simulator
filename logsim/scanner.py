@@ -145,7 +145,7 @@ class Scanner:
 
         else:  # not a valid character
             self.advance()
-
+        
         symbol.line_number = self.line_number
         return symbol
 
