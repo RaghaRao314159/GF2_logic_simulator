@@ -51,11 +51,13 @@ def test_lookup_adder(adder):
 
     while symbol.type != 8:
         first_char = ""
+        print(symbol.line_number, symbol.position, symbol.type)
         if (symbol.type in [5, 7]):
             # name or keyword
             # print(adder.names.get_name_string(symbol.id), end = " ")
             words_numbers.append(adder.names.get_name_string(symbol.id))
             first_char = adder.names.get_name_string(symbol.id)[0]
+            print("words_numbers", words_numbers)
 
 
         elif symbol.type == 6:
@@ -67,8 +69,9 @@ def test_lookup_adder(adder):
         else:
             first_char = adder.symbol_list[symbol.type]
 
-        # assert l[symbol.line_number - 1][symbol.position - 1] ==  first_char]
-        print(symbol.line_number, symbol.position, symbol.type)
+        #assert l[symbol.line_number - 1][symbol.position - 1] ==  first_char]
+
+
         # tests that scanner works
         assert l[symbol.line_number - 1][symbol.position - 1] == first_char
         symbol = adder.get_symbol()
@@ -95,6 +98,10 @@ def test_lookup_flip_flop(flip_flop):
         'END'
     ]
 
+    with open(os.path.join(os.path.dirname(__file__), "test_flip_flop.txt")) as f:
+        # l = [line.rstrip() for line in f]
+        # l = [x for x in l if x.strip()]
+        l = [line for line in f]
 
     symbol = flip_flop.get_symbol()
     
@@ -105,12 +112,22 @@ def test_lookup_flip_flop(flip_flop):
             # name or keyword
             # print(flip_flop.names.get_name_string(symbol.id), end = " ")
             words_numbers.append(flip_flop.names.get_name_string(symbol.id))
+            first_char = flip_flop.names.get_name_string(symbol.id)[0]
+            print("words_numbers", words_numbers)
 
         elif symbol.type == 6:
             # number
-            # print(symbol.id, end = " ")
             words_numbers.append(symbol.id)
+            first_char = str(symbol.id)[0]
 
+        else:
+            first_char = flip_flop.symbol_list[symbol.type]
+
+        #assert l[symbol.line_number - 1][symbol.position - 1] ==  first_char]
+
+
+        # tests that scanner works
+        assert l[symbol.line_number - 1][symbol.position - 1] == first_char
         symbol = flip_flop.get_symbol()
 
     # test key words

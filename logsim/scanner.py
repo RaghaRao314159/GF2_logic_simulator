@@ -110,6 +110,29 @@ class Scanner:
 
             self.skip_spaces() 
 
+        """
+        if self.current_character == "@":
+            self.advance()
+            while self.current_character != "@":
+                if self.current_character == "\n":
+                    self.line_number += 1
+                    self.position = 0
+                self.advance()
+            self.advance()
+            return self.get_symbol()
+
+        elif self.current_character == "#":
+            while self.current_character != "\n":
+                self.advance()
+            return self.get_symbol()
+
+        elif self.current_character == "\n":  # new line
+            self.line_number += 1
+            self.position = 0
+            self.advance()
+            return self.get_symbol()
+        """
+
         symbol.position = self.position
         symbol.line_number = self.line_number
 
@@ -153,7 +176,7 @@ class Scanner:
 
         else:  # not a valid character
             self.advance()
-        
+
         return symbol
 
     def get_name(self):
@@ -191,7 +214,6 @@ class Scanner:
         """Skip whitespace characters."""
         # skip whise cpaces and tabs until non white space or tab
         while self.current_character in [" ", "\t"]:
-            print("here is a space")
             self.advance()
             # tab is 4 spaces, 1 pos is added in advance, 3 more added here
             if self.current_character == "\t":
