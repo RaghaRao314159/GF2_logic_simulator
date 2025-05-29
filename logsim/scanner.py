@@ -58,6 +58,8 @@ class Scanner:
         self.symbol_type_list = [self.COMMA, self.SEMICOLON, self.COLON, self.ARROW, self.DOT,
             self.KEYWORD, self.NUMBER, self.NAME, self.EOF] = range(9)
         
+        self.symbol_list  = [',', ';', ':', '>', '.']
+
         self.keywords_list = ["DEVICES", "CONNECT", "MONITOR", "END", "CLOCK", "SWITCH", "AND", "NAND", "OR", "NOR",
                               "XOR", "DTYPE", "DATA", "CLK", "SET", "CLEAR", "Q", "QBAR", "I1", "I2", "I3", "I4", "I5",
                               "I6", "I7", "I8", "I9", "I10", "I11", "I12", "I13", "I14", "I15", "I16"]
@@ -106,6 +108,10 @@ class Scanner:
                 self.position = 0
                 self.advance()
 
+            self.skip_spaces() 
+
+        symbol.position = self.position
+        symbol.line_number = self.line_number
 
         if self.current_character.isalpha():  # name
             name_string = self.get_name()
@@ -147,9 +153,6 @@ class Scanner:
 
         else:  # not a valid character
             self.advance()
-
-        symbol.position = self.position
-        symbol.line_number = self.line_number
         
         return symbol
 
@@ -188,6 +191,7 @@ class Scanner:
         """Skip whitespace characters."""
         # skip white spaces and tabs until non white space or tab
         while self.current_character in [" ", "\t"]:
+            print("here is a space")
             self.advance()
             # tab is 4 spaces, 1 pos is added in advance, 3 more added here
             if self.current_character == "\t":

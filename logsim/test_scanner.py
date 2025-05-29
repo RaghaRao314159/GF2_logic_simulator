@@ -40,25 +40,40 @@ def test_lookup_adder(adder):
         'O1', 'I2', 'O1', 'NO1', 'I2', 'MONITOR', 'X2', 'O1', 'NO1', 'END'
     ]
 
+    with open(os.path.join(os.path.dirname(__file__), "test_adder.txt")) as f:
+        # l = [line.rstrip() for line in f]
+        # l = [x for x in l if x.strip()]
+        l = [line for line in f]
+
     symbol = adder.get_symbol()
     
     words_numbers = []
 
     while symbol.type != 8:
+        first_char = ""
         if (symbol.type in [5, 7]):
             # name or keyword
             # print(adder.names.get_name_string(symbol.id), end = " ")
             words_numbers.append(adder.names.get_name_string(symbol.id))
+            first_char = adder.names.get_name_string(symbol.id)[0]
+
 
         elif symbol.type == 6:
             # number
             # print(symbol.id, end = " ")
             words_numbers.append(symbol.id)
+            first_char = str(symbol.id)[0]
+        
+        else:
+            first_char = adder.symbol_list[symbol.type]
 
+        # assert l[symbol.line_number - 1][symbol.position - 1] ==  first_char]
+        print(symbol.line_number, symbol.position, symbol.type)
+        # tests that scanner works
+        assert l[symbol.line_number - 1][symbol.position - 1] == first_char
         symbol = adder.get_symbol()
 
-    # test key words
-
+    # tests if names adds keywords
     assert words_numbers == exp_words_numbers
 
 
