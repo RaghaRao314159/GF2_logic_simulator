@@ -82,6 +82,11 @@ class Scanner:
         self.current_character = "" 
         self.advance()
 
+        self.path = path
+
+        # self.lines = open(path, 'r').readlines()
+        self.lines = self.initialise_lines()
+
     def get_symbol(self):
         """Translate the next sequence of characters into a symbol."""
 
@@ -229,14 +234,22 @@ class Scanner:
             if self.current_character == "\t":
                 self.position += 3
     
+    def initialise_lines(self):
+        with open(self.path) as f:
+            # l = [line.rstrip() for line in f]
+            # l = [x for x in l if x.strip()]
+            l = [line for line in f]
+            return l
+
     def print_error(self, symbol):
         "Print an error message with the symbol's line number and position."
         # dictionary of lines
-        lines = self.FILE.readlines()
-        if 1 <= symbol.line_number <= len(lines):
-            print(lines[symbol.line_number - 1])  # line_number is 1-based
-            print(" " * (symbol.position - 1), "^") # caret
-        else:
-            print("Line number out of range.")
+        message = ""
         
+        if 1 <= symbol.line_number <= len(self.lines):
+            message += (self.lines[symbol.line_number - 1] + " " * (symbol.position - 1) + "^")
+        else:
+            message = "Line number out of range."
+    
+        return message
           
