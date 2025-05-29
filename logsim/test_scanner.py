@@ -44,6 +44,16 @@ def error_CONECT():
 
     return my_scanner, file_path
 
+@pytest.fixture
+def error_comment():
+    # create class of empty names
+    my_names = Names()
+    # use os library to get path of file in Linux and Windows environments
+    file_path = os.path.join(os.path.dirname(__file__), "test_scanner", "test_comment_error.txt")
+    my_scanner = Scanner(file_path, my_names)
+
+    return my_scanner, file_path
+
 def test_scanner_adder(adder):
     # example case
 
@@ -271,5 +281,51 @@ def test_scanner_print_error(error_CONECT):
 
         symbol = print_error.get_symbol()
     
+    # test key words
+    assert words_numbers == exp_words_numbers
+
+def test_comment_error(error_comment):
+    # example case where multi-line comment before CONNECT is never closed
+    # consecutive opening comment symbol ignored since closing comment symbol required 
+    # after comment has been opened
+
+    # convert self.FILE, while is a python file object to string using read
+    my_error, file_path = error_comment
+
+    # expected keywords to be detected
+    exp_words_numbers = [
+        'CONNECT', 'S1', 'D1', 'SET', 'S1', 'D2', 'SET',
+        'S2', 'D1', 'DATA', 'S3', 'D1', 'CLEAR', 'S3', 'D2', 'CLEAR',
+        'C1', 'D1', 'CLK', 'C1', 'D2', 'CLK','D1', 'Q', 'D2', 'DATA', 
+        'D2', 'Q', 'N1', 'I1', 'D2', 'QBAR', 'N1', 'I2'
+    ]
+
+    with open(file_path) as f:
+        l = [line for line in f]
+
+    symbol = my_error.get_symbol()
+    
+    words_numbers = []
+
+    while symbol.type != 8:
+        if (symbol.type in [5, 7]):
+            # name or keyword
+            words_numbers.append(my_error.names.get_name_string(symbol.id))
+            first_char = my_error.names.get_name_string(symbol.id)[0]
+            print("words_numbers", words_numbers)
+
+        elif symbol.type == 6:
+            # number
+            words_numbers.append(symbol.id)
+            first_char = str(symbol.id)[0]
+
+        else:
+            first_char = my_error.symbol_list[symbol.type]
+
+        # tests that scanner works
+        assert l[symbol.line_number - 1][symbol.position - 1] == first_char
+
+        symbol = my_error.get_symbol()
+
     # test key words
     assert words_numbers == exp_words_numbers

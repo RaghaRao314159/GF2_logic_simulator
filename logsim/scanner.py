@@ -109,6 +109,10 @@ class Scanner:
                         comment_flag = True
                         if self.current_character == "*":
                             comment_flag = False
+                        if self.current_character == "":
+                            symbol.type = self.EOF
+                            self.advance()
+                            return symbol
                         self.advance()
                     self.advance()
                 else:
@@ -126,6 +130,7 @@ class Scanner:
 
             self.skip_spaces() 
 
+        # this code uses recursion instead of a while loop
         """
         if self.current_character == "/":
             self.advance()
