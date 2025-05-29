@@ -89,16 +89,26 @@ class Scanner:
 
         self.skip_spaces()  # current character now not whitespace
 
-        while self.current_character in ["@", "#", "\n"]:
-            if self.current_character == "@":
+        while self.current_character in ["/", "#", "\n"]:
+            if self.current_character == "/":
                 self.advance()
-                while self.current_character != "@":
-                    if self.current_character == "\n":
-                        self.line_number += 1
-                        self.position = 0
+                if self.current_character == "*":
+                    comment_flag = True
+                    #(a and not b) or (not a and b)
+                    while not (self.current_character == "/" and not comment_flag):
+                        if self.current_character == "\n":
+                            self.line_number += 1
+                            self.position = 0
+                        comment_flag = True
+                        if self.current_character == "*":
+                            comment_flag = False
+                        self.advance()
                     self.advance()
-                self.advance()
-            
+                else:
+                    symbol.line_number = self.line_number
+                    symbol.position = self.position
+                    return symbol
+                
             elif self.current_character == "#":
                 while self.current_character != "\n":
                     self.advance()
@@ -111,9 +121,9 @@ class Scanner:
             self.skip_spaces() 
 
         """
-        if self.current_character == "@":
+        if self.current_character == "/":
             self.advance()
-            while self.current_character != "@":
+            while self.current_character != "/":
                 if self.current_character == "\n":
                     self.line_number += 1
                     self.position = 0
@@ -162,11 +172,11 @@ class Scanner:
             symbol.type = self.COMMA
             self.advance()
 
-        elif self.current_character == ":": # decive type
+        elif self.current_character == ":": # used for giving device types
             symbol.type = self.COLON
             self.advance()
         
-        elif self.current_character == ".": # decive type
+        elif self.current_character == ".": # used for inputs and outputs
             symbol.type = self.DOT
             self.advance()
 
