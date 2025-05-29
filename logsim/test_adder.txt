@@ -7,7 +7,7 @@ DEVICES X1:XOR,
         A2:AND 2,
         NO1:NOR 2,
         O1:OR 2,
-        S1:SWITCH 1, 
+        S1:SWITCH 1,
         S2:SWITCH 1,
         S3:SWITCH 0 ;
 
@@ -25,7 +25,7 @@ CONNECT S1 > X1.I1,
 
         A1 > O1.I1,
         A2 > O1.I2,
-        
+
         O1 > NO1.I2 ;
 
 @ monitor particular signals @
