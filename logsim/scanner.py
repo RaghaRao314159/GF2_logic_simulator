@@ -96,6 +96,8 @@ class Scanner:
 
         while self.current_character in ["/", "#", "\n"]:
             if self.current_character == "/":
+                symbol.line_number = self.line_number
+                symbol.position = self.position
                 self.advance()
                 if self.current_character == "*":
                     comment_flag = True
@@ -110,15 +112,14 @@ class Scanner:
                         self.advance()
                     self.advance()
                 else:
-                    symbol.line_number = self.line_number
-                    symbol.position = self.position
                     return symbol
-                
+
             elif self.current_character == "#":
                 while self.current_character != "\n":
                     self.advance()
             
             elif self.current_character == "\n": # new line
+                print("entered into new line")
                 self.line_number += 1
                 self.position = 0
                 self.advance()
@@ -147,7 +148,6 @@ class Scanner:
             self.advance()
             return self.get_symbol()
         """
-
         symbol.position = self.position
         symbol.line_number = self.line_number
 
