@@ -56,6 +56,7 @@ class Parser:
 
     def parse_network(self):
         """Parse the circuit definition file."""
+        # TODO
         # For now just return True, so that userint and gui can run in the
         # skeleton code. When complete, should return False when there are
         # errors in the circuit definition file.
@@ -63,7 +64,7 @@ class Parser:
     
     def is_valid_name(self, name):
         """Check if the name is valid."""
-        # TO DO
+        # TODO
         return True
     
     def signame(self):
@@ -73,7 +74,7 @@ class Parser:
 
         if self.is_valid_name(device_name):
             # Valid device name, get the next symbol
-            device_id = self.symbol.id
+            # device_id = TODO
             self.symbol = self.scanner.get_symbol()
 
             if self.symbol.type == self.scanner.DOT:
@@ -82,8 +83,8 @@ class Parser:
 
                 if self.symbol.type == self.scanner.NUMBER:
                     # Found a number, this is the port number
-                    port_id = self.symbol.id
-                    return [device_id, port_id]
+                    # port_id = TODO
+                    return [0, 0]
                 
                 else:
                     # Error: expected a number after the dot
