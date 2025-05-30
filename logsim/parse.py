@@ -35,6 +35,24 @@ class Parser:
 
     def __init__(self, names, devices, network, monitors, scanner):
         """Initialise constants."""
+        # inputs
+        self.names = names
+        self.scanner = scanner
+        self.monitors = monitors
+
+        """ TBC
+        self.devices = devices
+        self.network = network
+        """
+
+        # from parser
+        self.symbol = None
+
+        # errors
+        self.error_count = 0
+        self.error_type_list = [
+            self.NO_COMMA, self.NO_SEMICOLON, self.NO_COLON, self.NO_ARROW, self.NO_DOT,
+            self.NO_KEYWORD, self.NO_NUMBER, self.INVALID_NAME] = range(8)
 
     def parse_network(self):
         """Parse the circuit definition file."""
@@ -42,3 +60,108 @@ class Parser:
         # skeleton code. When complete, should return False when there are
         # errors in the circuit definition file.
         return True
+    
+    def is_valid_name(self, name):
+        """Check if the name is valid."""
+        # TO DO
+        return True
+    
+    def signame(self):
+        """Parse a signal name and return the device and port IDs."""
+        # TODO: What happens when the output is defined with no dot?
+        device_name = self.names.get_name_string(self.symbol.id)
+
+        if self.is_valid_name(device_name):
+            # Valid device name, get the next symbol
+            device_id = self.symbol.id
+            self.symbol = self.scanner.get_symbol()
+
+            if self.symbol.type == self.scanner.DOT:
+                # Found a dot, get the port number
+                self.symbol = self.scanner.get_symbol()
+
+                if self.symbol.type == self.scanner.NUMBER:
+                    # Found a number, this is the port number
+                    port_id = self.symbol.id
+                    return [device_id, port_id]
+                
+                else:
+                    # Error: expected a number after the dot
+                    return self.NO_NUMBER
+
+            else:
+                # Error: expected a dot after the device name    
+                return self.NO_DOT
+
+        else:
+            # Error: invalid device name
+            return self.INVALID_NAME
+
+    
+    def connection(self):
+        """Parse a single connection."""
+
+        # Get the input device and port number
+        signal = self.signame()
+        if len(signal) == 1:
+            # error has occured
+            self.error(signal[0])
+        else:
+            [in_device_id, in_port_id] = signal
+
+        # Check for arrow symbol
+        if self.symbol.type == self.scanner.ARROW:
+            self.symbol = self.scanner.get_symbol()
+            [out_device_id, out_port_id] = self.signame()
+        else:
+            self.error(self.NO_ARROW)
+
+        """ TBC
+        if self.error_count == 0:
+            error_type = self.network.make_connection(in_device_id, in_port_id, out_device_id, out_port_id)
+            if error_type != self.network.NO_ERROR:
+                self.error(...)
+        """
+    
+    def connection_list(self):
+        """Parse a list of connections."""
+        if (self.symbol.type == self.scanner.KEYWORD and
+            self.symbol.id == self.scanner.CONNECT_ID):
+            # Keyword 'connect' found, start parsing connections
+            self.symbol = self.scanner.get_symbol()
+            # Parse the first connection
+            self.connection()
+
+            # Continue parsing connections until no more commas
+            while self.symbol.type == self.scanner.COMMA:
+                self.symbol = self.scanner.get_symbol()
+                self.connection()
+            if self.symbol.type == self.scanner.SEMICOLON:
+                # End of connection list
+                self.symbol = self.scanner.get_symbol()
+            else:
+                # Error: expected semicolon
+                self.error(self.NO_SEMICOLON)
+        else:
+            # Error: expected 'connect' keyword
+            self.error(self.NO_KEYWORD)
+
+    def error(self, error_type):
+        """Handle errors in the definition file."""
+        self.error_count += 1
+        if error_type == self.NO_COMMA:
+            print("Expected a comma")
+        elif error_type == self.NO_SEMICOLON:
+            print("Expected a semicolon")
+        elif error_type == self.NO_COLON:
+            print("Expected a colon")
+        elif error_type == self.NO_ARROW:
+            print("Expected an arrow")
+        elif error_type == self.NO_DOT:
+            print("Expected a dot")
+        elif error_type == self.NO_KEYWORD:
+            print("Expected a keyword")
+        elif error_type == self.NO_NUMBER:
+            print("Expected a number")
+        elif error_type == self.INVALID_NAME:
+            print("Invalid device name")
