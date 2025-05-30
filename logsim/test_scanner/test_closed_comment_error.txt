@@ -1,7 +1,7 @@
-/*
+/*/
     Name the gates, switches and clocks. 
     Number of inputs and outputs
-    does not need to be defined for DTYPE 
+    does not need to be defined for *DTYPE/ 
 
 
 DEVICES D1:DTYPE, 
@@ -12,7 +12,7 @@ DEVICES D1:DTYPE,
         S2:SWITCH 1,
         S3:SWITCH 0 ;
 
-/* connect inputs and outputs */
+/** connect inputs/ and outputs */
 CONNECT S1 > D1.SET,
         S1 > D2.SET,
         S2 > D1.DATA,

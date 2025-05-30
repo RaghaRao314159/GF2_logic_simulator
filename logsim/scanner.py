@@ -102,6 +102,7 @@ class Scanner:
                 if self.current_character == "*":
                     comment_flag = True
                     #(a and not b) or (not a and b)
+                    self.advance()
                     while not (self.current_character == "/" and not comment_flag):
                         if self.current_character == "\n":
                             self.line_number += 1
@@ -120,6 +121,10 @@ class Scanner:
 
             elif self.current_character == "#":
                 while self.current_character != "\n":
+                    if self.current_character == "":
+                        symbol.type = self.EOF
+                        self.advance()
+                        return symbol
                     self.advance()
             
             elif self.current_character == "\n": # new line
