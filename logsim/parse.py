@@ -67,6 +67,29 @@ class Parser:
         # TODO
         return True
     
+    def device_list(self):
+        if (self.symbol.type == self.scanner.KEYWORD and
+            self.symbol.id == self.scanner.DEVICES_ID):
+            # Keyword 'connect' found, start parsing connections
+            self.symbol = self.scanner.get_symbol()
+            # Parse the first device
+            self.device()
+
+            while self.symbol.type == self.scanner.COMMA:
+                self.symbol = self.scanner.get_symbol()
+                self.device()
+            if self.symbol.type == self.scanner.SEMICOLON:
+                # End of connection list
+                self.symbol = self.scanner.get_symbol()
+            else:
+                # Error: expected semicolon
+                self.error(self.NO_SEMICOLON)
+        else:
+            # Error: expected 'connect' keyword
+            self.error(self.NO_KEYWORD)
+
+
+
     def signame(self):
         """Parse a signal name and return the device and port IDs."""
         # TODO: What happens when the output is defined with no dot?
