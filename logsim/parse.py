@@ -39,9 +39,8 @@ class Parser:
         self.names = names
         self.scanner = scanner
         self.monitors = monitors
-
-        """ TODO
         self.devices = devices
+        """ TODO
         self.network = network
         """
 
@@ -69,7 +68,7 @@ class Parser:
     def device(self):
         if self.symbol.type == self.scanner.NAME:
             # Valid device name, get the next symbol
-            # device_id = TODO
+            device_id = self.symbol.id
             self.symbol = self.scanner.get_symbol()
 
             if self.symbol.type == self.scanner.COLON:
@@ -78,6 +77,8 @@ class Parser:
                 if (self.symbol.type == self.scanner.KEYWORD and
                         self.symbol.id in self.scanner.device_id_list):
 
+                    device_type_id = self.symbol.id
+
                     if self.symbol.id in [self.scanner.XOR_ID, self.scanner.DTYPE_ID]:
                         self.symbol = self.scanner.get_symbol()
                         return
@@ -85,7 +86,16 @@ class Parser:
                     self.symbol = self.scanner.get_symbol()
 
                     if self.symbol.type == self.scanner.NUMBER:
+                        if device_type_id == self.scanner.CLOCK_ID:
+                            if not self.symbol.id:
+                                self.error(CLOCK_PERIOD_ZERO)
+                            else:
+                                self.devices.make_clock(device_id, self.symbol.id)
+                        elif device_type_id == self.scanner.SWITCH_ID:
+                            self.devices.make_switch(device_id, self.symbol.id)
+
                         self.symbol = self.scanner.get_symbol()
+
 
                     else:
                         self.error(self.NO_NUMBER)
