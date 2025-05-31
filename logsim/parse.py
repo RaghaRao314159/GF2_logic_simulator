@@ -40,7 +40,7 @@ class Parser:
         self.scanner = scanner
         self.monitors = monitors
 
-        """ TBC
+        """ TODO
         self.devices = devices
         self.network = network
         """
@@ -52,7 +52,7 @@ class Parser:
         self.error_count = 0
         self.error_type_list = [
             self.NO_COMMA, self.NO_SEMICOLON, self.NO_COLON, self.NO_ARROW, self.NO_DOT,
-            self.NO_KEYWORD, self.NO_NUMBER, self.INVALID_NAME] = range(8)
+            self.NO_KEYWORD, self.NO_DEVICE_TYPE, self.NO_NUMBER, self.INVALID_NAME] = range(9)
 
     def parse_network(self):
         """Parse the circuit definition file."""
@@ -64,9 +64,43 @@ class Parser:
     
     def is_valid_name(self, name):
         """Check if the name is valid."""
-        # TODO
         return True
-    
+
+    def device(self):
+        if self.symbol.type == self.scanner.NAME:
+            # Valid device name, get the next symbol
+            # device_id = TODO
+            self.symbol = self.scanner.get_symbol()
+
+            if self.symbol.type == self.scanner.COLON:
+                self.symbol = self.scanner.get_symbol()
+
+                if (self.symbol.type == self.scanner.KEYWORD and
+                        self.symbol.id in self.scanner.device_id_list):
+
+                    if self.symbol.id in [self.scanner.XOR_ID, self.scanner.DTYPE_ID]:
+                        self.symbol = self.scanner.get_symbol()
+                        return
+
+                    self.symbol = self.scanner.get_symbol()
+
+                    if self.symbol.type == self.scanner.NUMBER:
+                        self.symbol = self.scanner.get_symbol()
+
+                    else:
+                        self.error(self.NO_NUMBER)
+
+                else:
+                    self.error(self.NO_DEVICE_TYPE)
+
+            else:
+                self.error(self.NO_COLON)
+
+        else:
+            self.error(self.INVALID_NAME)
+
+
+
     def device_list(self):
         if (self.symbol.type == self.scanner.KEYWORD and
             self.symbol.id == self.scanner.DEVICES_ID):
@@ -95,7 +129,7 @@ class Parser:
         # TODO: What happens when the output is defined with no dot?
         device_name = self.names.get_name_string(self.symbol.id)
 
-        if self.is_valid_name(device_name):
+        if self.symbol.type == self.scanner.NAME:
             # Valid device name, get the next symbol
             # device_id = TODO
             self.symbol = self.scanner.get_symbol()
@@ -185,6 +219,8 @@ class Parser:
             print("Expected a dot")
         elif error_type == self.NO_KEYWORD:
             print("Expected a keyword")
+        elif error_type == self.NO_DEVICE_TYPE:
+            print("Expected a device type")
         elif error_type == self.NO_NUMBER:
             print("Expected a number")
         elif error_type == self.INVALID_NAME:
