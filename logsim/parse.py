@@ -201,13 +201,16 @@ class Parser:
             error = self.device()
 
 
+
         if self.symbol.type == self.scanner.SEMICOLON:
             # End of connection list
             self.symbol = self.scanner.get_symbol()
+
         else:
             # Error: expected semicolon
             self.error(self.NO_SEMICOLON)
-            return
+        
+        return
 
 
 
@@ -295,6 +298,7 @@ class Parser:
             print("Expected a comma")
         elif error_type == self.NO_SEMICOLON:
             print("Expected a semicolon")
+            self.parent = None
         elif error_type == self.NO_COLON:
             print("Expected a colon")
         elif error_type == self.NO_ARROW:
@@ -311,20 +315,21 @@ class Parser:
             print("Invalid device name")
         elif error_type == self.NO_INITIALISATION_KEYWORD:
             print("Expected DEVICES, CONNECT, MONITOR or END")
-        
-
-        stopping_symbl_list = [self.scanner.SEMICOLON]
-        if self.parent:
-            stopping_symbl_list.append(self.scanner.COMMA)
 
         while self.symbol.type != self.scanner.EOF:
             self.symbol = self.scanner.get_symbol()
-            if self.symbol.type in stopping_symbl_list:
+
+            if self.parent and self.symbol.type == self.scanner.COMMA:
+                return
+            
+            if self.symbol.type == self.scanner.SEMICOLON:
                 self.symbol = self.scanner.get_symbol()
+                self.parent = None
                 return
             
             
             if self.symbol.id in [self.scanner.DEVICES_ID, self.scanner.CONNECT_ID, self.scanner.MONITOR_ID, self.scanner.END_ID]:
+                self.parent = None
                 self.error_count += 1
                 print("Expected a semicolon")
                 return
