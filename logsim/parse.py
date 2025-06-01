@@ -68,6 +68,11 @@ class Parser:
         return True
     
     
+
+
+
+
+    
     def signame(self):
         """Parse a signal name and return the device and port IDs."""
         # TODO: What happens when the output is defined with no dot?
