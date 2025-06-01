@@ -39,9 +39,8 @@ class Parser:
         self.names = names
         self.scanner = scanner
         self.monitors = monitors
-
-        """ TBC
         self.devices = devices
+        """ TODO
         self.network = network
         """
 
@@ -52,7 +51,7 @@ class Parser:
         self.error_count = 0
         self.error_type_list = [
             self.NO_COMMA, self.NO_SEMICOLON, self.NO_COLON, self.NO_ARROW, self.NO_DOT,
-            self.NO_KEYWORD, self.NO_NUMBER, self.INVALID_NAME] = range(8)
+            self.NO_KEYWORD, self.NO_DEVICE_TYPE, self.NO_NUMBER, self.INVALID_NAME] = range(9)
 
     def parse_network(self):
         """Parse the circuit definition file."""
@@ -64,21 +63,83 @@ class Parser:
     
     def is_valid_name(self, name):
         """Check if the name is valid."""
-        # TODO
         return True
-    
-    
+
+    def device(self):
+        if self.symbol.type == self.scanner.NAME:
+            # Valid device name, get the next symbol
+            device_id = self.symbol.id
+            self.symbol = self.scanner.get_symbol()
+
+            if self.symbol.type == self.scanner.COLON:
+                self.symbol = self.scanner.get_symbol()
+
+                if (self.symbol.type == self.scanner.KEYWORD and
+                        self.symbol.id in self.scanner.device_id_list):
+
+                    device_type_id = self.symbol.id
+
+                    if self.symbol.id in [self.scanner.XOR_ID, self.scanner.DTYPE_ID]:
+                        self.symbol = self.scanner.get_symbol()
+                        return
+
+                    self.symbol = self.scanner.get_symbol()
+
+                    if self.symbol.type == self.scanner.NUMBER:
+                        if device_type_id == self.scanner.CLOCK_ID:
+                            if not self.symbol.id:
+                                self.error(CLOCK_PERIOD_ZERO)
+                            else:
+                                self.devices.make_clock(device_id, self.symbol.id)
+                        elif device_type_id == self.scanner.SWITCH_ID:
+                            self.devices.make_switch(device_id, self.symbol.id)
+
+                        self.symbol = self.scanner.get_symbol()
+
+
+                    else:
+                        self.error(self.NO_NUMBER)
+
+                else:
+                    self.error(self.NO_DEVICE_TYPE)
+
+            else:
+                self.error(self.NO_COLON)
+
+        else:
+            self.error(self.INVALID_NAME)
 
 
 
+    def device_list(self):
+        if (self.symbol.type == self.scanner.KEYWORD and
+            self.symbol.id == self.scanner.DEVICES_ID):
+            # Keyword 'connect' found, start parsing connections
+            self.symbol = self.scanner.get_symbol()
+            # Parse the first device
+            self.device()
 
-    
+            while self.symbol.type == self.scanner.COMMA:
+                self.symbol = self.scanner.get_symbol()
+                self.device()
+            if self.symbol.type == self.scanner.SEMICOLON:
+                # End of connection list
+                self.symbol = self.scanner.get_symbol()
+            else:
+                # Error: expected semicolon
+                self.error(self.NO_SEMICOLON)
+        else:
+            # Error: expected 'connect' keyword
+            self.error(self.NO_KEYWORD)
+
+
+
     def signame(self):
         """Parse a signal name and return the device and port IDs."""
         # TODO: What happens when the output is defined with no dot?
         device_name = self.names.get_name_string(self.symbol.id)
 
-        if self.is_valid_name(device_name):
+        if self.symbol.type == self.scanner.NAME:
             # Valid device name, get the next symbol
             # device_id = TODO
             self.symbol = self.scanner.get_symbol()
@@ -168,6 +229,8 @@ class Parser:
             print("Expected a dot")
         elif error_type == self.NO_KEYWORD:
             print("Expected a keyword")
+        elif error_type == self.NO_DEVICE_TYPE:
+            print("Expected a device type")
         elif error_type == self.NO_NUMBER:
             print("Expected a number")
         elif error_type == self.INVALID_NAME:
