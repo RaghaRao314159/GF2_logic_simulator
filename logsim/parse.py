@@ -51,7 +51,7 @@ class Parser:
         self.error_count = 0
         self.error_type_list = [
             self.NO_COMMA, self.NO_SEMICOLON, self.NO_COLON, self.NO_ARROW, self.NO_DOT,
-            self.NO_KEYWORD, self.NO_DEVICE_TYPE, self.NO_NUMBER, self.INVALID_NAME] = range(9)
+            self.NO_KEYWORD, self.NO_DEVICE_TYPE, self.NO_NUMBER, self.INVALID_NAME, self.CLOCK_PERIOD_ZERO] = range(9)
 
     def parse_network(self):
         """Parse the circuit definition file."""
@@ -59,8 +59,42 @@ class Parser:
         # For now just return True, so that userint and gui can run in the
         # skeleton code. When complete, should return False when there are
         # errors in the circuit definition file.
+
+
+        if self.symbol.id == self.scanner.DEVICES_ID:
+            # Keyword 'connect' found, start parsing connections
+            self.symbol = self.scanner.get_symbol()
+            self.device_list()
+
+        elif self.symbol.id == self.scanner.CONNECT_ID:
+            self.symbol = self.scanner.get_symbol()
+            self.connection_list()
+
+        elif self.symbol.id == self.scanner.MONITOR_ID:
+            self.symbol = self.scanner.get_symbol()
+            self.monitor_list()
+        
+        elif self.symbol.id == self.scanner.END_ID:
+            self.symbol = self.scanner.get_symbol()
+            self.end_of_file()
+            
+        else:
+            self.error(self.NO_INITIALISATION_KEYWORD)
+
+
+
+
         return True
     
+
+    def end_of_file(self):
+        if self.scanner.type != self.scanner.EOF:
+            self.error(self.NOT_END)
+        
+        return
+        
+
+
     def is_valid_name(self, name):
         """Check if the name is valid."""
         return True
@@ -88,7 +122,8 @@ class Parser:
                     if self.symbol.type == self.scanner.NUMBER:
                         if device_type_id == self.scanner.CLOCK_ID:
                             if not self.symbol.id:
-                                self.error(CLOCK_PERIOD_ZERO)
+                                self.error(self.CLOCK_PERIOD_ZERO)
+                                return
                             else:
                                 self.devices.make_clock(device_id, self.symbol.id)
                         elif device_type_id == self.scanner.SWITCH_ID:
@@ -99,38 +134,38 @@ class Parser:
 
                     else:
                         self.error(self.NO_NUMBER)
+                        return
 
                 else:
                     self.error(self.NO_DEVICE_TYPE)
+                    return
 
             else:
                 self.error(self.NO_COLON)
+                return
 
         else:
             self.error(self.INVALID_NAME)
+            return
 
 
 
     def device_list(self):
-        if (self.symbol.type == self.scanner.KEYWORD and
-            self.symbol.id == self.scanner.DEVICES_ID):
-            # Keyword 'connect' found, start parsing connections
-            self.symbol = self.scanner.get_symbol()
-            # Parse the first device
-            self.device()
 
-            while self.symbol.type == self.scanner.COMMA:
-                self.symbol = self.scanner.get_symbol()
-                self.device()
-            if self.symbol.type == self.scanner.SEMICOLON:
-                # End of connection list
-                self.symbol = self.scanner.get_symbol()
-            else:
-                # Error: expected semicolon
-                self.error(self.NO_SEMICOLON)
+        # Parse the first device
+        self.device()
+
+        while self.symbol.type == self.scanner.COMMA:
+            self.symbol = self.scanner.get_symbol()
+            self.device()
+        if self.symbol.type == self.scanner.SEMICOLON:
+            # End of connection list
+            self.symbol = self.scanner.get_symbol()
         else:
-            # Error: expected 'connect' keyword
-            self.error(self.NO_KEYWORD)
+            # Error: expected semicolon
+            self.error(self.NO_SEMICOLON)
+            return
+
 
 
 
@@ -174,6 +209,7 @@ class Parser:
         if len(signal) == 1:
             # error has occured
             self.error(signal[0])
+            return
         else:
             [in_device_id, in_port_id] = signal
 
@@ -183,6 +219,7 @@ class Parser:
             [out_device_id, out_port_id] = self.signame()
         else:
             self.error(self.NO_ARROW)
+            return
 
         """ TBC
         if self.error_count == 0:
@@ -193,26 +230,20 @@ class Parser:
     
     def connection_list(self):
         """Parse a list of connections."""
-        if (self.symbol.type == self.scanner.KEYWORD and
-            self.symbol.id == self.scanner.CONNECT_ID):
-            # Keyword 'connect' found, start parsing connections
-            self.symbol = self.scanner.get_symbol()
-            # Parse the first connection
-            self.connection()
+        # Parse the first connection
+        self.connection()
 
-            # Continue parsing connections until no more commas
-            while self.symbol.type == self.scanner.COMMA:
-                self.symbol = self.scanner.get_symbol()
-                self.connection()
-            if self.symbol.type == self.scanner.SEMICOLON:
-                # End of connection list
-                self.symbol = self.scanner.get_symbol()
-            else:
-                # Error: expected semicolon
-                self.error(self.NO_SEMICOLON)
+        # Continue parsing connections until no more commas
+        while self.symbol.type == self.scanner.COMMA:
+            self.symbol = self.scanner.get_symbol()
+            self.connection()
+        if self.symbol.type == self.scanner.SEMICOLON:
+            # End of connection list
+            self.symbol = self.scanner.get_symbol()
         else:
-            # Error: expected 'connect' keyword
-            self.error(self.NO_KEYWORD)
+            # Error: expected semicolon
+            self.error(self.NO_SEMICOLON)
+            return
 
     def error(self, error_type):
         """Handle errors in the definition file."""
@@ -235,3 +266,22 @@ class Parser:
             print("Expected a number")
         elif error_type == self.INVALID_NAME:
             print("Invalid device name")
+        
+        while self.symbol.type != self.scanner.EOF:
+            self.symbol = self.scanner.get_symbol()
+            if self.symbol.type == self.scanner.SEMICOLON:
+                self.symbol = self.scanner.get_symbol()
+                return
+            
+            if self.symbol.id in  [self.scanner.DEVICES_ID, self.scanner.CONNECT_ID, self.scanner.MONITOR_ID, self.scanner.END_ID]:
+                self.error_count += 1
+                print("Expected a semicolon")
+                return
+        
+
+        self.error_count += 1
+        print("Expected 'END' keyword")
+        return
+                
+
+            
