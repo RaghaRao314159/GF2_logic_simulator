@@ -40,6 +40,8 @@ class Parser:
         self.scanner = scanner
         self.monitors = monitors
         self.devices = devices
+        self.parent = None
+
         """ TODO
         self.network = network
         """
@@ -51,7 +53,8 @@ class Parser:
         self.error_count = 0
         self.error_type_list = [
             self.NO_COMMA, self.NO_SEMICOLON, self.NO_COLON, self.NO_ARROW, self.NO_DOT,
-            self.NO_KEYWORD, self.NO_DEVICE_TYPE, self.NO_NUMBER, self.INVALID_NAME, self.CLOCK_PERIOD_ZERO] = range(9)
+            self.NO_KEYWORD, self.NO_DEVICE_TYPE, self.NO_NUMBER, self.INVALID_NAME, 
+            self.CLOCK_PERIOD_ZERO, self.NO_INITIALISATION_KEYWORD] = range(11)
 
     def parse_network(self):
         """Parse the circuit definition file."""
@@ -59,30 +62,32 @@ class Parser:
         # For now just return True, so that userint and gui can run in the
         # skeleton code. When complete, should return False when there are
         # errors in the circuit definition file.
+        self.scanner.get_symbol()
+        while self.symbol.type != self.scanner.EOF:
+            if self.symbol.id == self.scanner.DEVICES_ID:
+                self.parent = 'D'
+                # Keyword 'connect' found, start parsing connections
+                self.symbol = self.scanner.get_symbol()
+                self.device_list()
 
+            elif self.symbol.id == self.scanner.CONNECT_ID:
+                self.parent = 'C'
+                self.symbol = self.scanner.get_symbol()
+                self.connection_list()
 
-        if self.symbol.id == self.scanner.DEVICES_ID:
-            # Keyword 'connect' found, start parsing connections
-            self.symbol = self.scanner.get_symbol()
-            self.device_list()
-
-        elif self.symbol.id == self.scanner.CONNECT_ID:
-            self.symbol = self.scanner.get_symbol()
-            self.connection_list()
-
-        elif self.symbol.id == self.scanner.MONITOR_ID:
-            self.symbol = self.scanner.get_symbol()
-            self.monitor_list()
-        
-        elif self.symbol.id == self.scanner.END_ID:
-            self.symbol = self.scanner.get_symbol()
-            self.end_of_file()
+            elif self.symbol.id == self.scanner.MONITOR_ID:
+                self.parent = 'M'
+                self.symbol = self.scanner.get_symbol()
+                self.monitor_list()
             
-        else:
-            self.error(self.NO_INITIALISATION_KEYWORD)
-
-
-
+            elif self.symbol.id == self.scanner.END_ID:
+                self.symbol = self.scanner.get_symbol()
+                self.end_of_file()
+                break
+                
+            else:
+                self.error(self.NO_INITIALISATION_KEYWORD)
+            self.parent = None
 
         return True
     
@@ -108,9 +113,9 @@ class Parser:
 
         self.symbol = self.scanner.get_symbol()
 
-        if self.symbol.type != self.scanner.NUMBER:
+        '''if self.symbol.type != self.scanner.NUMBER:
             self.error(self.NO_NUMBER)
-            return False
+            return False'''
 
         if self.symbol.id == self.scanner.AND_ID:
             self.devices.make_device(device_id, self.devices.AND, device_property=self.symbol.id)
@@ -122,9 +127,16 @@ class Parser:
             self.devices.make_device(device_id, self.devices.NOR, device_property=self.symbol.id)
         elif self.symbol.id == self.scanner.CLOCK_ID:
             self.devices.make_device(device_id, self.devices.CLOCK, device_property=self.symbol.id)
+            
         elif self.symbol.id == self.scanner.SWITCH_ID:
-            self.devices.make_device(device_id, self.devices.SWITCH, device_property=self.symbol.id)
+            error = self.devices.make_device(device_id, self.devices.SWITCH, device_property=self.symbol.id)
+            if error == self.devices.INVALID_QUALIFIER:
+                return self.NOT_BIT
         
+        if error == self.devices.NO_QUALIFIER:
+            return self.NO_NUMBER
+        
+        return self.NO_ERROR
 
         '''
         if self.symbol.id in [self.scanner.XOR_ID, self.scanner.DTYPE_ID]:
@@ -165,30 +177,30 @@ class Parser:
 
                 if (self.symbol.type == self.scanner.KEYWORD and
                         self.symbol.id in self.scanner.device_id_list):
-                    self.make_device_parser(device_id)
+                    error = self.make_device_parser(device_id)
+                    return error
 
                 else:
-                    self.error(self.NO_DEVICE_TYPE)
-                    return
+                    return self.NO_DEVICE_TYPE
 
             else:
-                self.error(self.NO_COLON)
-                return
+                return self.NO_COLON
 
         else:
-            self.error(self.INVALID_NAME)
-            return
+            return self.INVALID_NAME
 
 
 
     def device_list(self):
 
         # Parse the first device
-        self.device()
+        error = self.device()
 
         while self.symbol.type == self.scanner.COMMA:
             self.symbol = self.scanner.get_symbol()
-            self.device()
+            error = self.device()
+
+
         if self.symbol.type == self.scanner.SEMICOLON:
             # End of connection list
             self.symbol = self.scanner.get_symbol()
@@ -234,8 +246,6 @@ class Parser:
     
     def connection(self):
         """Parse a single connection."""
-
-
 
         # Get the input device and port number
         signal = self.signame()
@@ -299,14 +309,22 @@ class Parser:
             print("Expected a number")
         elif error_type == self.INVALID_NAME:
             print("Invalid device name")
+        elif error_type == self.NO_INITIALISATION_KEYWORD:
+            print("Expected DEVICES, CONNECT, MONITOR or END")
         
+
+        stopping_symbl_list = [self.scanner.SEMICOLON]
+        if self.parent:
+            stopping_symbl_list.append(self.scanner.COMMA)
+
         while self.symbol.type != self.scanner.EOF:
             self.symbol = self.scanner.get_symbol()
-            if self.symbol.type == self.scanner.SEMICOLON:
+            if self.symbol.type in stopping_symbl_list:
                 self.symbol = self.scanner.get_symbol()
                 return
             
-            if self.symbol.id in  [self.scanner.DEVICES_ID, self.scanner.CONNECT_ID, self.scanner.MONITOR_ID, self.scanner.END_ID]:
+            
+            if self.symbol.id in [self.scanner.DEVICES_ID, self.scanner.CONNECT_ID, self.scanner.MONITOR_ID, self.scanner.END_ID]:
                 self.error_count += 1
                 print("Expected a semicolon")
                 return
