@@ -116,6 +116,9 @@ class Parser:
             self.devices.make_device(device_id, self.devices.AND, device_property=self.symbol.id)
         elif self.symbol.id == self.scanner.OR_ID:
             self.devices.make_device(device_id, self.devices.OR, device_property=self.symbol.id)
+        elif self.symbol.id == self.scanner.NAND_ID:
+            self.devices.make_device(device_id, self.devices.NAND, device_property=self.symbol.id)
+        
         
 
         '''
