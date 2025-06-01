@@ -120,6 +120,10 @@ class Parser:
             self.devices.make_device(device_id, self.devices.NAND, device_property=self.symbol.id)
         elif self.symbol.id == self.scanner.NOR_ID:
             self.devices.make_device(device_id, self.devices.NOR, device_property=self.symbol.id)
+        elif self.symbol.id == self.scanner.CLOCK_ID:
+            self.devices.make_device(device_id, self.devices.CLOCK, device_property=self.symbol.id)
+        elif self.symbol.id == self.scanner.SWITCH_ID:
+            self.devices.make_device(device_id, self.devices.SWITCH, device_property=self.symbol.id)
         
 
         '''
