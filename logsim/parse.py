@@ -100,7 +100,6 @@ class Parser:
         return True
 
     def make_device_parser(self, device_id):
-        self.devices.make_device(device_id, device_kind, device_property=None)
 
         if self.symbol.id == self.scanner.XOR_ID:
             self.devices.make_device(device_id, self.devices.XOR, device_property=None)
@@ -115,8 +114,9 @@ class Parser:
 
         if self.symbol.id == self.scanner.AND_ID:
             self.devices.make_device(device_id, self.devices.AND, device_property=self.symbol.id)
-        elif self.symbol.id == self.scanner.AND_ID:
-            self.devices.make_device(device_id, self.devices.AND, device_property=self.symbol.id)
+        elif self.symbol.id == self.scanner.OR_ID:
+            self.devices.make_device(device_id, self.devices.OR, device_property=self.symbol.id)
+        
 
         '''
         if self.symbol.id in [self.scanner.XOR_ID, self.scanner.DTYPE_ID]:
