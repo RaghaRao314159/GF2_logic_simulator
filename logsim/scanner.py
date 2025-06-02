@@ -138,7 +138,6 @@ class Scanner:
                     self.advance()
             
             elif self.current_character == "\n": # new line
-                print("entered into new line")
                 self.line_number += 1
                 self.position = 0
                 self.advance()
