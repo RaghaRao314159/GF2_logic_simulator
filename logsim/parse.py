@@ -71,9 +71,9 @@ class Parser:
             if self.symbol.id == self.scanner.DEVICES_ID:
                 self.parent = 'D'
                 # Keyword 'connect' found, start parsing connections
-                print("before next symbol", self.scanner.DEVICES_ID)
+                # print("before next symbol", self.scanner.DEVICES_ID)
                 self.symbol = self.scanner.get_symbol()
-                print("before entering", self.symbol.id, self.names.get_name_string(self.symbol.id))
+                # print("before entering", self.symbol.id, self.names.get_name_string(self.symbol.id))
                 self.device_list()
 
             elif self.symbol.id == self.scanner.CONNECT_ID:
@@ -104,16 +104,16 @@ class Parser:
 
         return
 
-    def make_device_parser(self, device_id):
+    def make_device_parser(self, device_id, device_type_id):
         self.symbol = self.scanner.get_symbol()
         error = None
 
-        if device_id == self.scanner.XOR_ID:
+        if device_type_id == self.scanner.XOR_ID:
             error = self.devices.make_device(device_id, self.devices.XOR, device_property=self.symbol.id)
         elif device_id == self.scanner.DTYPE_ID:
             error = self.devices.make_device(device_id, self.devices.D_TYPE, device_property=self.symbol.id)
 
-        print("Current Charcter", self.scanner.current_character)
+        # print("Current Charcter", self.scanner.current_character)
 
         if error == self.devices.QUALIFIER_PRESENT:
             error = self.QUALIFIER_PRESENT
@@ -122,11 +122,11 @@ class Parser:
             error = self.NO_ERROR
             return error
 
-        if device_id == self.scanner.AND_ID:
+        if device_type_id == self.scanner.AND_ID:
             error =self.devices.make_device(device_id, self.devices.AND, device_property=self.symbol.id)
-        elif device_id == self.scanner.OR_ID:
+        elif device_type_id == self.scanner.OR_ID:
             error = self.devices.make_device(device_id, self.devices.OR, device_property=self.symbol.id)
-        elif device_id == self.scanner.NAND_ID:
+        elif device_type_id == self.scanner.NAND_ID:
             error = self.devices.make_device(device_id, self.devices.NAND, device_property=self.symbol.id)
         elif device_id == self.scanner.NOR_ID:
             error = self.devices.make_device(device_id, self.devices.NOR, device_property=self.symbol.id)
@@ -138,7 +138,7 @@ class Parser:
         elif error == self.devices.INVALID_QUALIFIER:
             error = self.INVALID_RANGE
 
-        if device_id == self.scanner.CLOCK_ID:
+        if device_type_id == self.scanner.CLOCK_ID:
             error = self.devices.make_device(device_id, self.devices.CLOCK, device_property=self.symbol.id)
             if error == self.devices.NO_QUALIFIER:
                 error = self.NO_NUMBER
@@ -146,7 +146,7 @@ class Parser:
                 error = self.NO_ERROR
             elif error == self.devices.INVALID_QUALIFIER:
                 error = self.CLOCK_PERIOD_ZERO
-        elif device_id == self.scanner.SWITCH_ID:
+        elif device_type_id == self.scanner.SWITCH_ID:
             error = self.devices.make_device(device_id, self.devices.SWITCH, device_property=self.symbol.id)
             if error in [self.devices.NO_QUALIFIER, self.devices.INVALID_QUALIFIER]:
                 error = self.NOT_BIT
@@ -163,12 +163,14 @@ class Parser:
             self.symbol = self.scanner.get_symbol()
 
             if self.symbol.type == self.scanner.COLON:
-                print('spotted colon correctly')
+                # print('spotted colon correctly')
                 self.symbol = self.scanner.get_symbol()
 
                 if (self.symbol.type == self.scanner.KEYWORD and
                         self.symbol.id in self.scanner.device_id_list):
-                    return self.make_device_parser(device_id)
+                    # print('spotted keyword correctly')
+                    device_type_id = self.symbol.id
+                    return self.make_device_parser(device_id, device_type_id)
 
                 else:
                     return self.NO_DEVICE_TYPE
@@ -182,16 +184,16 @@ class Parser:
 
 
     def device_list(self):
-        print('before first device', self.scanner.current_character)
+        # print('before first device', self.scanner.current_character)
         # Parse the first device
         error = self.device()
-        print('after first device', self.scanner.current_character)
+        # print('after first device', self.scanner.current_character)
         while self.symbol.type == self.scanner.COMMA:
             self.symbol = self.scanner.get_symbol()
             error = self.device()
-            print("prior parent value", self.parent)
+            # print("prior parent value", self.parent)
             if error != self.NO_ERROR:
-                print("parent value", self.parent)
+                # print("parent value", self.parent)
                 self.error(error)
 
             if self.parent == None:
