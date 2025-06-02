@@ -223,7 +223,8 @@ class Parser:
                     return self.NO_NUMBER
 
             else:
-                # Error: expected a dot after the device name    
+                # Error: expected a dot after the device name
+                if device_id in []:
                 return self.NO_DOT
 
         else:
@@ -260,20 +261,26 @@ class Parser:
 
     def connection_list(self):
         """Parse a list of connections."""
-        # Parse the first connection
-        self.connection()
+        # Parse the first device
+        error = self.connection()
 
-        # Continue parsing connections until no more commas
         while self.symbol.type == self.scanner.COMMA:
             self.symbol = self.scanner.get_symbol()
-            self.connection()
+            error = self.connection()
+            if error !=  self.NO_ERROR:
+                self.error(error)
+            if self.parent == None:
+                return
+
         if self.symbol.type == self.scanner.SEMICOLON:
             # End of connection list
             self.symbol = self.scanner.get_symbol()
+
         else:
             # Error: expected semicolon
             self.error(self.NO_SEMICOLON)
-            return
+
+        return
 
     def error(self, error_type):
         """Handle errors in the definition file."""

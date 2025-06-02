@@ -78,7 +78,6 @@ class Scanner:
         self.device_id_list = [self.CLOCK_ID, self.SWITCH_ID, self.AND_ID, self.NAND_ID, self.OR_ID, self.NOR_ID,
                                  self.XOR_ID, self.DTYPE_ID]
 
-
         self.position = 0
         self.line_number = 1
 
