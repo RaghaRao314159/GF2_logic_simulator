@@ -110,7 +110,7 @@ class Parser:
 
         if device_type_id == self.scanner.XOR_ID:
             error = self.devices.make_device(device_id, self.devices.XOR, device_property=self.symbol.id)
-        elif device_id == self.scanner.DTYPE_ID:
+        elif device_type_id == self.scanner.DTYPE_ID:
             error = self.devices.make_device(device_id, self.devices.D_TYPE, device_property=self.symbol.id)
 
         # print("Current Charcter", self.scanner.current_character)
@@ -128,7 +128,7 @@ class Parser:
             error = self.devices.make_device(device_id, self.devices.OR, device_property=self.symbol.id)
         elif device_type_id == self.scanner.NAND_ID:
             error = self.devices.make_device(device_id, self.devices.NAND, device_property=self.symbol.id)
-        elif device_id == self.scanner.NOR_ID:
+        elif device_type_id == self.scanner.NOR_ID:
             error = self.devices.make_device(device_id, self.devices.NOR, device_property=self.symbol.id)
 
         if error == self.devices.NO_QUALIFIER:
@@ -225,8 +225,9 @@ class Parser:
 
             self.symbol = self.scanner.get_symbol()
             device_type_id = self.devices.get_device(device_id).device_kind
+            print("device type id", device_type_id, self.dot_signals["IN"])
 
-            if device_type_id not in [self.dot_signals["IN"]]:
+            if device_type_id not in self.dot_signals["IN"]:
                 if self.symbol.type == self.scanner.DOT:
                     return self.DOT
                 return [device_id, None]
@@ -262,11 +263,13 @@ class Parser:
             # Valid device name, get the next symbol
             device_id = self.symbol.id
             if self.devices.get_device(device_id) == None:
+                print("Device not found")
                 return self.DEVICE_ABSENT
 
             device_type_id = self.devices.get_device(device_id).device_kind
 
             if device_type_id in [self.devices.SWITCH, self.devices.CLOCK]:
+                print("Invalid connection to SWITCH or CLOCK")
                 return self.INVALID_CONNECTION_SC
             
             self.symbol = self.scanner.get_symbol()
@@ -277,27 +280,33 @@ class Parser:
                 # Found a number, this is the port number
                 port_id = self.symbol.id
 
-                if port_id not in self.get_device(device_id).inputs.keys():
-                    if device_type_id == self.devices.D_TYPE:        
+                if port_id not in self.devices.get_device(device_id).inputs.keys():
+                    if device_type_id == self.devices.D_TYPE:
+                            print("Invalid port number for D-type device")        
                             return self.INVALID_PORT_DTYPE      
 
-                    elif device_type_id == self.devices.XOR:        
+                    elif device_type_id == self.devices.XOR:
+                            print("Invalid port number for XOR device")        
                             return self.INVALID_PORT_XOR  
                      
                     else: 
                         name = self.names.get_name_string(self.symbol.id)
                         if name[0] != 'I':
+                            print("Port is not an input port")
                             return self.NOT_I_PORT
+                        print("Port number out of range")
                         return self.PORT_OUT_RANGE
                     
                 return [device_id, port_id]
 
             else:
                 # Error: expected a dot after the device name
+                print("Expected a dot after the device name")
                 return self.NO_DOT
 
         else:
             # Error: invalid device name
+            print("Invalid device name")
             return self.INVALID_NAME
     
 
@@ -308,18 +317,26 @@ class Parser:
         in_signal = self.in_signame()
         if type(in_signal) == int:
             # error has occured
+            print("error in in_signal")
             return in_signal
         else:
             [in_device_id, in_port_id] = in_signal
+        
+        # ISSUE IS HERE, TO DO WITH NEXT SYMBOLLLL
+        # self.symbol = self.scanner.get_symbol()
+
 
         # Check for arrow symbol
         if self.symbol.type != self.scanner.ARROW:
             return self.NO_ARROW
 
+        self.symbol = self.scanner.get_symbol()
+
         # Get the output device and port number
         out_signal = self.out_signame()
         if type(out_signal) == int:
             # error has occured
+            print("error in out_signal")
             return out_signal
         else:
             [out_device_id, out_port_id] = out_signal
@@ -327,17 +344,20 @@ class Parser:
         # if self.error_count == 0:
         error_type = self.network.make_connection(in_device_id, in_port_id, out_device_id, out_port_id)
         if error_type == self.network.DEVICE_ABSENT:
+            print("Device not found")
             return self.DEVICE_ABSENT
         elif error_type == self.network.INPUT_CONNECTED:
+            print("Input already connected")
             return self.INPUT_CONNECTED
         elif error_type == self.network.INPUT_TO_INPUT:
+            print("Input cannot be connected to another input")
             return self.INPUT_TO_INPUT
         elif error_type == self.network.PORT_ABSENT:
+            print("Port not found")
             return self.PORT_ABSENT
         elif error_type == self.network.OUTPUT_TO_OUTPUT:
+            print("Output cannot be connected to another output")
             return self.OUTPUT_TO_OUTPUT
-        elif not self.network.check_network():
-            return self.NOT_CONNECTED
 
         return self.NO_ERROR
 
@@ -345,14 +365,28 @@ class Parser:
         """Parse a list of connections."""
         # Parse the first device
         error = self.connection()
+        if error !=  self.NO_ERROR:
+            # print("not no error")
+            self.error(error)
+        else:
+            self.symbol = self.scanner.get_symbol()
+
+        if self.parent == None:
+            return
+
+        # print("Current symbol type", self.symbol.type)
 
         while self.symbol.type == self.scanner.COMMA:
             self.symbol = self.scanner.get_symbol()
             error = self.connection()
             if error !=  self.NO_ERROR:
                 self.error(error)
+            else:
+                self.symbol = self.scanner.get_symbol()
+
             if self.parent == None:
                 return
+            
 
         if self.symbol.type == self.scanner.SEMICOLON:
             # End of connection list
