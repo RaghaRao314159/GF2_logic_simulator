@@ -246,26 +246,35 @@ class Parser:
 
         if self.symbol.type == self.scanner.NAME:
             # Valid device name, get the next symbol
-            if self.symbol.id in [self.scanner.SWITCH_ID, self.scanner.CLOCK_ID]:
-                return self.INVALID_CONNECTION_SC
-
             device_id = self.symbol.id
-            self.symbol = self.scanner.get_symbol()
             device_type_id = self.get_device(device_id).device_kind
+            if device_type_id == None:
+                return self.DEVICE_ABSENT
             
-            if self.symbol.type == self.scanner.DOT:
+            if device_type_id in [self.devices.SWITCH, self.devices.CLOCK]:
+                return self.INVALID_CONNECTION_SC
+            
+            self.symbol = self.scanner.get_symbol()
 
+            if self.symbol.type == self.scanner.DOT:
                 # Found a dot, get the port number
                 self.symbol = self.scanner.get_symbol()
-
                 # Found a number, this is the port number
                 port_id = self.symbol.id
 
+                if port_id not in self.get_device(device_id).inputs.keys():
+                    if device_type_id == self.devices.D_TYPE:        
+                            return self.INVALID_PORT_DTYPE      
 
-                if device_type_id == self.devices.D_TYPE and port_id not in self.get_device(device_id).inputs.keys():
-                    return self.INVALID_PORT
-
-                
+                    elif device_type_id == self.devices.XOR:        
+                            return self.INVALID_PORT_XOR  
+                     
+                    else: 
+                        name = self.names.get_name_string(self.symbol.id)
+                        if name[0] != 'I':
+                            return self.NOT_I_PORT
+                        return self.PORT_OUT_RANGE
+                    
                 return [device_id, port_id]
 
             else:
@@ -284,7 +293,7 @@ class Parser:
         in_signal = self.in_signame()
         if type(signal) == int:
             # error has occured
-            self.error(signal[0])
+            self.error(signal)
             return
         else:
             [in_device_id, in_port_id] = in_signal

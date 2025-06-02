@@ -77,6 +77,12 @@ class Scanner:
 
         self.device_id_list = [self.CLOCK_ID, self.SWITCH_ID, self.AND_ID, self.NAND_ID, self.OR_ID, self.NOR_ID,
                                  self.XOR_ID, self.DTYPE_ID]
+        
+        self.gate_port_id_list = [self.I1_ID,
+            self.I2_ID, self.I3_ID, self.I4_ID, self.I5_ID,
+            self.I6_ID, self.I7_ID, self.I8_ID, self.I9_ID,
+            self.I10_ID, self.I11_ID, self.I12_ID, self.I13_ID,
+            self.I14_ID, self.I15_ID, self.I16_ID] 
 
         self.position = 0
         self.line_number = 1
