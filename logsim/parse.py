@@ -53,8 +53,9 @@ class Parser:
         self.error_count = 0
         self.error_type_list = [
             self.NO_COMMA, self.NO_SEMICOLON, self.NO_COLON, self.NO_ARROW, self.NO_DOT,
-            self.NO_KEYWORD, self.NO_DEVICE_TYPE, self.NO_NUMBER, self.INVALID_NAME, 
-            self.CLOCK_PERIOD_ZERO, self.NO_INITIALISATION_KEYWORD] = range(11)
+            self.NO_KEYWORD, self.NO_DEVICE_TYPE, self.NO_NUMBER, self.INVALID_NAME,
+            self.CLOCK_PERIOD_ZERO, self.NO_INITIALISATION_KEYWORD, self.NOT_BIT,
+            self.NO_ERROR, self.QUALIFIER_PRESENT, self.INVALID_RANGE] = range(11)
 
     def parse_network(self):
         """Parse the circuit definition file."""
@@ -79,54 +80,74 @@ class Parser:
                 self.parent = 'M'
                 self.symbol = self.scanner.get_symbol()
                 self.monitor_list()
-            
+
             elif self.symbol.id == self.scanner.END_ID:
                 self.symbol = self.scanner.get_symbol()
                 self.end_of_file()
                 break
-                
+
             else:
                 self.error(self.NO_INITIALISATION_KEYWORD)
             self.parent = None
 
         return True
-    
+
 
     def end_of_file(self):
         if self.scanner.type != self.scanner.EOF:
             self.error(self.NOT_END)
-        
+
         return
 
     def make_device_parser(self, device_id):
+        self.symbol = self.scanner.get_symbol()
+        error = None
 
-        if self.symbol.id == self.scanner.XOR_ID:
-            self.devices.make_device(device_id, self.devices.XOR, device_property=None)
-        elif self.symbol.id == self.scanner.DTYPE_ID:
-            self.devices.make_device(device_id, self.devices.D_TYPE, device_property=None)
+        if device_id == self.scanner.XOR_ID:
+            error = self.devices.make_device(device_id, self.devices.XOR, device_property=self.symbol.id)
+        elif device_id == self.scanner.DTYPE_ID:
+            error = self.devices.make_device(device_id, self.devices.D_TYPE, device_property=self.symbol.id)
+
+        if error == self.devices.QUALIFIER_PRESENT:
+            error = self.QUALIFIER_PRESENT
+            return error
+        elif error == self.devices.NO_ERROR:
+            error = self.NO_ERROR
+            return error
+
+        if device_id == self.scanner.AND_ID:
+            error =self.devices.make_device(device_id, self.devices.AND, device_property=self.symbol.id)
+        elif device_id == self.scanner.OR_ID:
+            error = self.devices.make_device(device_id, self.devices.OR, device_property=self.symbol.id)
+        elif device_id == self.scanner.NAND_ID:
+            error = self.devices.make_device(device_id, self.devices.NAND, device_property=self.symbol.id)
+        elif device_id == self.scanner.NOR_ID:
+            error = self.devices.make_device(device_id, self.devices.NOR, device_property=self.symbol.id)
+
+        if error == self.devices.NO_QUALIFIER:
+            error = self.NO_NUMBER
+        elif error == self.devices.NO_ERROR:
+            error = self.NO_ERROR
+        elif error == self.devices.INVALID_QUALIFIER:
+            error = self.INVALID_RANGE
+
+        if device_id == self.scanner.CLOCK_ID:
+            error = self.devices.make_device(device_id, self.devices.CLOCK, device_property=self.symbol.id)
+            if error == self.devices.NO_QUALIFIER:
+                error = self.NO_NUMBER
+            elif error == self.devices.NO_ERROR:
+                error = self.NO_ERROR
+            elif error == self.devices.INVALID_QUALIFIER:
+                error = self.CLOCK_PERIOD_ZERO
+        elif device_id == self.scanner.SWITCH_ID:
+            error = self.devices.make_device(device_id, self.devices.SWITCH, device_property=self.symbol.id)
+            if error in [self.devices.NO_QUALIFIER, self.devices.INVALID_QUALIFIER]:
+                error = self.NOT_BIT
+            elif error == self.devices.NO_ERROR:
+                error = self.NO_ERROR
 
         self.symbol = self.scanner.get_symbol()
-
-        if self.symbol.id == self.scanner.AND_ID:
-            self.devices.make_device(device_id, self.devices.AND, device_property=self.symbol.id)
-        elif self.symbol.id == self.scanner.OR_ID:
-            self.devices.make_device(device_id, self.devices.OR, device_property=self.symbol.id)
-        elif self.symbol.id == self.scanner.NAND_ID:
-            self.devices.make_device(device_id, self.devices.NAND, device_property=self.symbol.id)
-        elif self.symbol.id == self.scanner.NOR_ID:
-            self.devices.make_device(device_id, self.devices.NOR, device_property=self.symbol.id)
-        elif self.symbol.id == self.scanner.CLOCK_ID:
-            self.devices.make_device(device_id, self.devices.CLOCK, device_property=self.symbol.id)
-            
-        elif self.symbol.id == self.scanner.SWITCH_ID:
-            error = self.devices.make_device(device_id, self.devices.SWITCH, device_property=self.symbol.id)
-            if error == self.devices.INVALID_QUALIFIER:
-                return self.NOT_BIT
-        
-        if error == self.devices.NO_QUALIFIER:
-            return self.NO_NUMBER
-        
-        return self.NO_ERROR
+        return error
 
     def device(self):
         if self.symbol.type == self.scanner.NAME:
@@ -170,7 +191,7 @@ class Parser:
         else:
             # Error: expected semicolon
             self.error(self.NO_SEMICOLON)
-        
+
         return
 
 
@@ -194,7 +215,7 @@ class Parser:
                     # Found a number, this is the port number
                     port_id = self.symbol.id
                     return [device_id, port_id]
-                
+
                 else:
                     # Error: expected a number after the dot
                     return self.NO_NUMBER
@@ -207,7 +228,7 @@ class Parser:
             # Error: invalid device name
             return self.INVALID_NAME
 
-    
+
     def connection(self):
         """Parse a single connection."""
 
@@ -234,7 +255,7 @@ class Parser:
             if error_type != self.network.NO_ERROR:
                 self.error(...)
         """
-    
+
     def connection_list(self):
         """Parse a list of connections."""
         # Parse the first connection
@@ -258,7 +279,7 @@ class Parser:
         if error_type == self.NO_COMMA:
             print("Expected a comma")
         elif error_type == self.NO_SEMICOLON:
-            print("Expected a semicolon")
+            print("Expected a comma or semicolon")
             self.parent = None
         elif error_type == self.NO_COLON:
             print("Expected a colon")
@@ -276,25 +297,31 @@ class Parser:
             print("Invalid device name")
         elif error_type == self.NO_INITIALISATION_KEYWORD:
             print("Expected DEVICES, CONNECT, MONITOR or END")
+        elif error_type == self.NOT_BIT:
+            print("Expected a bit (0 or 1)")
+        elif error_type == self.QUALIFIER_PRESENT:
+            print("Did not expect a parameter")
+        elif error_type == self.INVALID_RANGE:
+            print("Expected number between 1 and 16 inclusive")
 
         while self.symbol.type != self.scanner.EOF:
             self.symbol = self.scanner.get_symbol()
 
             if self.parent and self.symbol.type == self.scanner.COMMA:
                 return
-            
+
             if self.symbol.type == self.scanner.SEMICOLON:
                 self.symbol = self.scanner.get_symbol()
                 self.parent = None
                 return
-            
-            
+
+
             if self.symbol.id in [self.scanner.DEVICES_ID, self.scanner.CONNECT_ID, self.scanner.MONITOR_ID, self.scanner.END_ID]:
                 self.parent = None
                 self.error_count += 1
                 print("Expected a semicolon")
                 return
-        
+
 
         self.error_count += 1
         print("Expected 'END' keyword")
