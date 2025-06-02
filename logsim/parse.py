@@ -56,6 +56,9 @@ class Parser:
             self.NO_KEYWORD, self.NO_DEVICE_TYPE, self.NO_NUMBER, self.INVALID_NAME,
             self.CLOCK_PERIOD_ZERO, self.NO_INITIALISATION_KEYWORD, self.NOT_BIT,
             self.NO_ERROR, self.QUALIFIER_PRESENT, self.INVALID_RANGE] = range(11)
+        
+        self.dot_signals = {"IN": [self.devices.D_TYPE],
+                            "OUT": [self.devices.D_TYPE, self.devices.XOR, self.devices.AND, self.devices.NAND, self.devices.OR, self.devices.NOR] }
 
     def parse_network(self):
         """Parse the circuit definition file."""
@@ -199,55 +202,97 @@ class Parser:
 
 
 
-    def signame(self):
+    def in_signame(self):
         """Parse a signal name and return the device and port IDs."""
         # TODO: What happens when the output is defined with no dot?
-        device_name = self.names.get_name_string(self.symbol.id)
 
         if self.symbol.type == self.scanner.NAME:
             # Valid device name, get the next symbol
             device_id = self.symbol.id
             self.symbol = self.scanner.get_symbol()
+            device_type_id = self.get_device(device_id).device_kind
 
+            if device_type_id not in [self.dot_signals["IN"]]:
+                if self.symbol.type == self.scanner.DOT:
+                    return self.DOT
+                return [device_id, None]
+
+            
             if self.symbol.type == self.scanner.DOT:
+
                 # Found a dot, get the port number
                 self.symbol = self.scanner.get_symbol()
 
-                if self.symbol.type == self.scanner.NAME:
-                    # Found a number, this is the port number
-                    port_id = self.symbol.id
-                    return [device_id, port_id]
+                # Found a number, this is the port number
+                port_id = self.symbol.id
 
-                else:
-                    # Error: expected a number after the dot
-                    return self.NO_NUMBER
+                if port_id not in [self.scanner.Q_ID, self.scanner.QBAR_ID]:
+                    return self.INVALID_PORT
+
+                return [device_id, port_id]
 
             else:
                 # Error: expected a dot after the device name
-                if device_id in []:
                 return self.NO_DOT
 
         else:
             # Error: invalid device name
             return self.INVALID_NAME
+        
+    
+    def out_signame(self):
+        """Parse a signal name and return the device and port IDs."""
+        # TODO: What happens when the output is defined with no dot?
 
+        if self.symbol.type == self.scanner.NAME:
+            # Valid device name, get the next symbol
+            if self.symbol.id in [self.scanner.SWITCH_ID, self.scanner.CLOCK_ID]:
+                return self.INVALID_CONNECTION_SC
+
+            device_id = self.symbol.id
+            self.symbol = self.scanner.get_symbol()
+            device_type_id = self.get_device(device_id).device_kind
+            
+            if self.symbol.type == self.scanner.DOT:
+
+                # Found a dot, get the port number
+                self.symbol = self.scanner.get_symbol()
+
+                # Found a number, this is the port number
+                port_id = self.symbol.id
+
+
+                if device_type_id == self.devices.D_TYPE and port_id not in self.get_device(device_id).inputs.keys():
+                    return self.INVALID_PORT
+
+                
+                return [device_id, port_id]
+
+            else:
+                # Error: expected a dot after the device name
+                return self.NO_DOT
+
+        else:
+            # Error: invalid device name
+            return self.INVALID_NAME
+    
 
     def connection(self):
         """Parse a single connection."""
 
         # Get the input device and port number
-        signal = self.signame()
-        if len(signal) == 1:
+        in_signal = self.in_signame()
+        if type(signal) == int:
             # error has occured
             self.error(signal[0])
             return
         else:
-            [in_device_id, in_port_id] = signal
+            [in_device_id, in_port_id] = in_signal
 
         # Check for arrow symbol
         if self.symbol.type == self.scanner.ARROW:
             self.symbol = self.scanner.get_symbol()
-            [out_device_id, out_port_id] = self.signame()
+            [out_device_id, out_port_id] = self.out_signame()
         else:
             self.error(self.NO_ARROW)
             return
@@ -297,6 +342,8 @@ class Parser:
             print("Expected an arrow")
         elif error_type == self.NO_DOT:
             print("Expected a dot")
+        elif error_type == self.DOT:
+            print("Did not expect a dot")
         elif error_type == self.NO_KEYWORD:
             print("Expected a keyword")
         elif error_type == self.NO_DEVICE_TYPE:
@@ -313,6 +360,8 @@ class Parser:
             print("Did not expect a parameter")
         elif error_type == self.INVALID_RANGE:
             print("Expected number between 1 and 16 inclusive")
+        elif error_type == self.INVALID_CONNECTION_SC:
+            print("Should not to SWITCH or CLOCK")
 
         while self.symbol.type != self.scanner.EOF:
             self.symbol = self.scanner.get_symbol()
