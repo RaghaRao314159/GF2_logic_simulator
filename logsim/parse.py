@@ -318,6 +318,9 @@ class Parser:
             return self.PORT_ABSENT
         elif error_type == self.network.OUTPUT_TO_OUTPUT:
             return self.OUTPUT_TO_OUTPUT
+        elif not self.network.check_network():
+            return self.NOT_CONNECTED
+
         return self.NO_ERROR
 
     def connection_list(self):
