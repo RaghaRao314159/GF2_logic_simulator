@@ -181,8 +181,10 @@ class Parser:
         while self.symbol.type == self.scanner.COMMA:
             self.symbol = self.scanner.get_symbol()
             error = self.device()
-
-
+            if error !=  self.NO_ERROR:
+                self.error(error)
+            if self.parent == None:
+                return
 
         if self.symbol.type == self.scanner.SEMICOLON:
             # End of connection list
@@ -276,11 +278,12 @@ class Parser:
     def error(self, error_type):
         """Handle errors in the definition file."""
         self.error_count += 1
+        stopping_punctuation_flag = False
         if error_type == self.NO_COMMA:
             print("Expected a comma")
         elif error_type == self.NO_SEMICOLON:
             print("Expected a comma or semicolon")
-            self.parent = None
+            stopping_punctuation_flag = True
         elif error_type == self.NO_COLON:
             print("Expected a colon")
         elif error_type == self.NO_ARROW:
@@ -318,8 +321,9 @@ class Parser:
 
             if self.symbol.id in [self.scanner.DEVICES_ID, self.scanner.CONNECT_ID, self.scanner.MONITOR_ID, self.scanner.END_ID]:
                 self.parent = None
-                self.error_count += 1
-                print("Expected a semicolon")
+                if not stopping_punctuation_flag:
+                    self.error_count += 1
+                    print("Expected a semicolon")
                 return
 
 
