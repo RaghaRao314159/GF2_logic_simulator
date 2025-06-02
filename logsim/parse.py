@@ -97,12 +97,6 @@ class Parser:
             self.error(self.NOT_END)
         
         return
-        
-
-
-    def is_valid_name(self, name):
-        """Check if the name is valid."""
-        return True
 
     def make_device_parser(self, device_id):
 
@@ -112,10 +106,6 @@ class Parser:
             self.devices.make_device(device_id, self.devices.D_TYPE, device_property=None)
 
         self.symbol = self.scanner.get_symbol()
-
-        '''if self.symbol.type != self.scanner.NUMBER:
-            self.error(self.NO_NUMBER)
-            return False'''
 
         if self.symbol.id == self.scanner.AND_ID:
             self.devices.make_device(device_id, self.devices.AND, device_property=self.symbol.id)
@@ -138,34 +128,6 @@ class Parser:
         
         return self.NO_ERROR
 
-        '''
-        if self.symbol.id in [self.scanner.XOR_ID, self.scanner.DTYPE_ID]:
-            self.devices.make_device(device_id, device_kind, device_property=None)
-            self.symbol = self.scanner.get_symbol()
-            return
-
-        self.symbol = self.scanner.get_symbol()
-
-        if self.symbol.type == self.scanner.NUMBER:
-
-            if self.symbol.id == self.scanner.CLOCK_ID:
-                if not self.symbol.id:
-                    self.error(self.CLOCK_PERIOD_ZERO)
-                    return
-                else:
-                    self.devices.make_clock(device_id, self.symbol.id)
-
-            elif self.symbol.id == self.scanner.SWITCH_ID:
-                self.devices.make_switch(device_id, self.symbol.id)
-
-            self.symbol = self.scanner.get_symbol()
-
-
-        else:
-            self.error(self.NO_NUMBER)
-            return
-        '''
-
     def device(self):
         if self.symbol.type == self.scanner.NAME:
             # Valid device name, get the next symbol
@@ -177,8 +139,7 @@ class Parser:
 
                 if (self.symbol.type == self.scanner.KEYWORD and
                         self.symbol.id in self.scanner.device_id_list):
-                    error = self.make_device_parser(device_id)
-                    return error
+                    return self.make_device_parser(device_id)
 
                 else:
                     return self.NO_DEVICE_TYPE
