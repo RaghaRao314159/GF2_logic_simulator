@@ -153,7 +153,10 @@ class Parser:
             elif error == self.devices.NO_ERROR:
                 error = self.NO_ERROR
 
+        if error == None:
+            error = self.NO_ERROR
         self.symbol = self.scanner.get_symbol()
+    
         return error
 
     def device(self):
@@ -418,6 +421,8 @@ class Parser:
             print("Invalid port number for XOR device")
         elif error_type == self.NOT_END:
             print("Expected 'END' keyword")
+        else:
+            print("Unknown error")
 
         print(self.scanner.print_error(self.symbol))
 
