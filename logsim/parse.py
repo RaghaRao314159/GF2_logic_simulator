@@ -52,7 +52,10 @@ class Parser:
             self.NO_COMMA, self.NO_SEMICOLON, self.NO_COLON, self.NO_ARROW, self.NO_DOT,
             self.NO_KEYWORD, self.NO_DEVICE_TYPE, self.NO_NUMBER, self.INVALID_NAME,
             self.CLOCK_PERIOD_ZERO, self.NO_INITIALISATION_KEYWORD, self.NOT_BIT,
-            self.NO_ERROR, self.QUALIFIER_PRESENT, self.INVALID_RANGE] = range(11)
+            self.NO_ERROR, self.QUALIFIER_PRESENT, self.INVALID_RANGE, self.NO_DOT, self.DOT,
+            self.INVALID_CONNECTION_SC, self.DEVICE_ABSENT, self.INPUT_CONNECTED,
+            self.INPUT_TO_INPUT, self.PORT_ABSENT, self.OUTPUT_TO_OUTPUT, self.NOT_CONNECTED,
+            self.INVALID_PORT, self.INVALID_PORT_DTYPE, self.INVALID_PORT_XOR, self.NOT_I_PORT, self.PORT_OUT_RANGE, self.NOT_END] = range(30)
         
         self.dot_signals = {"IN": [self.devices.D_TYPE],
                             "OUT": [self.devices.D_TYPE, self.devices.XOR, self.devices.AND, self.devices.NAND, self.devices.OR, self.devices.NOR] }
@@ -195,9 +198,6 @@ class Parser:
             self.error(self.NO_SEMICOLON)
 
         return
-
-
-
 
     def in_signame(self):
         """Parse a signal name and return the device and port IDs."""
@@ -381,6 +381,28 @@ class Parser:
             print("Expected number between 1 and 16 inclusive")
         elif error_type == self.INVALID_CONNECTION_SC:
             print("Should not to SWITCH or CLOCK")
+        elif error_type == self.DEVICE_ABSENT:
+            print("Device not found")
+        elif error_type == self.INPUT_CONNECTED:
+            print("Input already connected")
+        elif error_type == self.INPUT_TO_INPUT:
+            print("Input cannot be connected to another input")
+        elif error_type == self.PORT_ABSENT:
+            print("Port not found")
+        elif error_type == self.OUTPUT_TO_OUTPUT:
+            print("Output cannot be connected to another output")
+        elif error_type == self.NOT_I_PORT:
+            print("Port is not an input port")
+        elif error_type == self.PORT_OUT_RANGE:
+            print("Port number out of range")
+        elif error_type == self.INVALID_PORT:
+            print("Invalid port number")
+        elif error_type == self.INVALID_PORT_DTYPE:
+            print("Invalid port number for D-type device")
+        elif error_type == self.INVALID_PORT_XOR:
+            print("Invalid port number for XOR device")
+        elif error_type == self.NOT_END:
+            print("Expected 'END' keyword")
 
         while self.symbol.type != self.scanner.EOF:
             self.symbol = self.scanner.get_symbol()
