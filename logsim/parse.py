@@ -41,10 +41,7 @@ class Parser:
         self.monitors = monitors
         self.devices = devices
         self.parent = None
-
-        """ TODO
         self.network = network
-        """
 
         # from parser
         self.symbol = None
@@ -291,27 +288,37 @@ class Parser:
 
         # Get the input device and port number
         in_signal = self.in_signame()
-        if type(signal) == int:
+        if type(in_signal) == int:
             # error has occured
-            self.error(signal)
-            return
+            return in_signal
         else:
             [in_device_id, in_port_id] = in_signal
 
         # Check for arrow symbol
-        if self.symbol.type == self.scanner.ARROW:
-            self.symbol = self.scanner.get_symbol()
-            [out_device_id, out_port_id] = self.out_signame()
-        else:
-            self.error(self.NO_ARROW)
-            return
+        if self.symbol.type != self.scanner.ARROW:
+            return self.NO_ARROW
 
-        """ TBC
-        if self.error_count == 0:
-            error_type = self.network.make_connection(in_device_id, in_port_id, out_device_id, out_port_id)
-            if error_type != self.network.NO_ERROR:
-                self.error(...)
-        """
+        # Get the output device and port number
+        out_signal = self.out_signame()
+        if type(out_signal) == int:
+            # error has occured
+            return out_signal
+        else:
+            [out_device_id, out_port_id] = out_signal
+
+        # if self.error_count == 0:
+        error_type = self.network.make_connection(in_device_id, in_port_id, out_device_id, out_port_id)
+        if error_type == self.network.DEVICE_ABSENT:
+            return self.DEVICE_ABSENT
+        elif error_type == self.network.INPUT_CONNECTED:
+            return self.INPUT_CONNECTED
+        elif error_type == self.network.INPUT_TO_INPUT:
+            return self.INPUT_TO_INPUT
+        elif error_type == self.network.PORT_ABSENT:
+            return self.PORT_ABSENT
+        elif error_type == self.network.OUTPUT_TO_OUTPUT:
+            return self.OUTPUT_TO_OUTPUT
+        return self.NO_ERROR
 
     def connection_list(self):
         """Parse a list of connections."""
