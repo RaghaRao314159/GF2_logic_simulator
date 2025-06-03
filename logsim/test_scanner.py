@@ -332,9 +332,8 @@ def test_closed_comment_error(error_closed_comment):
 
 
 def test_open_comment_error(error_open_comment):
-    # example case where multi-line comment before CONNECT is never closed
-    # consecutive opening comment symbol ignored since closing comment symbol required 
-    # after comment has been opened
+    # example case where open comment is open
+    # Code should rightfully just end
 
     my_error, file_path, exp_words_numbers = error_open_comment
 

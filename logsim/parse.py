@@ -420,7 +420,7 @@ class Parser:
         elif error_type == self.NO_NUMBER:
             print("Expected a number")
         elif error_type == self.INVALID_NAME:
-            print("Invalid device name")
+            print("Invalid device name (main)")
         elif error_type == self.NO_INITIALISATION_KEYWORD:
             print("Expected DEVICES, CONNECT, MONITOR or END")
         elif error_type == self.NOT_BIT:

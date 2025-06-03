@@ -24,7 +24,7 @@ CONECT S1 > D1.SET,
 
         D1.Q > D2.DATA,
         D2.Q > N1.I1,
-        D2.QBAR > N1.I2,
+        D2.QBAR > N1.I2 ;
 
 /* monitor certain signals */
 MONITOR D1.QBAR,
