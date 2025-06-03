@@ -4,30 +4,33 @@
     does not need to be defined for DTYPE
 */
 
+? # double errror, invalid character and no semicolon
+
 DEVICES D1:DTYPE,
-        D2:DTYPE,
-        N1:NAND 2,
-        C1:CLOCK 8,
-        S1:SWITCH 0,
-        S2:SWITCH 1,
-        S3:SWITCH 0 ;
+        D2:DTYPE 3, # error as DTYPE should not be an error
+        N1:NAD 2, # error as NAND is spelt incorrectly
+        C1:CLOCK -8, # error as - is an invalid symbol
+        S1:SWITCH 2, # error as switch only takes a bit
+        S2:SWITCH 1 # error as comma missed
+        S3.SWITCH 0 ; # error as should not have a dot
 
 /* connect inputs and outputs */
-CONECT S1 > D1.SET,
+CONECT S1 > D1.SET, # error as connect is spelt incorrectly
         S1 > D2.SET,
         S2 > D1.DATA,
         S3 > D1.CLEAR,
-        S3 > D2.CLEAR,
+        S3 > D2.CLAR, # Not error as this is skipped (skip to next semicolon)
 
         C1 > D1.CLK,
         C1 > D2.CLK,
 
         D1.Q > D2.DATA,
         D2.Q > N1.I1,
-        D2.QBAR > N1.I2 ;
+        D2.QBAR > N1.I2 # error as no semicolon
 
 /* monitor certain signals */
 MONITOR D1.QBAR,
         N1 ;
 
-END
+/* error as END is spelt incorrectly below */
+ED

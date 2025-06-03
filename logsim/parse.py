@@ -96,7 +96,7 @@ class Parser:
             self.parent = None
 
         if self.error_count > 0:
-            print(f"Summary: {self.error_count} error/s found")
+            print(f"Summary: {self.error_count} error/s found\n")
             return False
         
         return True
@@ -410,7 +410,7 @@ class Parser:
         if error_type == self.NO_COMMA:
             print("Expected a comma")
         elif error_type == self.NO_SEMICOLON:
-            print("Expected a comma or semicolon")
+            print("Expected a comma or semicolon") # tested
             stopping_punctuation_flag = True
         elif error_type == self.NO_COLON:
             print("Expected a colon")
@@ -423,23 +423,23 @@ class Parser:
         elif error_type == self.NO_KEYWORD:
             print("Expected a keyword")
         elif error_type == self.NO_DEVICE_TYPE:
-            print("Expected a device type")
+            print("Expected a device type") # tested
         elif error_type == self.NO_NUMBER:
-            print("Expected a number")
+            print("Expected a number") # tested
         elif error_type == self.INVALID_NAME:
             print("Invalid device name (main)")
         elif error_type == self.NO_INITIALISATION_KEYWORD:
             print("Expected DEVICES, CONNECT, MONITOR or END")
         elif error_type == self.NOT_BIT:
-            print("Expected a bit (0 or 1)")
+            print("Expected a bit (0 or 1)") # tested
         elif error_type == self.QUALIFIER_PRESENT:
-            print("Did not expect a parameter")
+            print("Did not expect a parameter") # tested
         elif error_type == self.INVALID_RANGE:
             print("Expected number between 1 and 16 inclusive")
         elif error_type == self.INVALID_CONNECTION_SC:
             print("Should not to SWITCH or CLOCK")
         elif error_type == self.DEVICE_ABSENT:
-            print("Device not found")
+            print("Device not found") # tested
         elif error_type == self.INPUT_CONNECTED:
             print("Input already connected")
         elif error_type == self.INPUT_TO_INPUT:
@@ -483,13 +483,17 @@ class Parser:
                 self.parent = None
                 if not stopping_punctuation_flag:
                     self.error_count += 1
-                    print("Expected a semicolon prior to this:")
-                    self.scanner.print_error(self.symbol)
+                    print("Expected a semicolon prior to this:") # tested
+                    print(f"LINE {self.symbol.line_number}:")
+                    print(self.scanner.print_error(self.symbol))
+                    print()
                 return
 
 
         self.error_count += 1
-        print("Expected 'END' keyword")
+        print("Expected 'END' keyword before end of file.") # tested
+        print(f"LINE {self.symbol.line_number}:")
+        print()
         return
                 
 
