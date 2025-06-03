@@ -68,7 +68,7 @@ class Parser:
         # errors in the circuit definition file.
         self.symbol = self.scanner.get_symbol()
         while self.symbol.type != self.scanner.EOF:
-            if self.symbol.id == self.scanner.DEVICES_ID:
+            if (self.symbol.id == self.scanner.DEVICES_ID) or (self.parent == 'D'):
                 self.parent = 'D'
                 # Keyword 'connect' found, start parsing connections
                 # print("before next symbol", self.scanner.DEVICES_ID)
@@ -150,10 +150,12 @@ class Parser:
                 error = self.NO_ERROR
             elif error == self.devices.INVALID_QUALIFIER:
                 error = self.CLOCK_PERIOD_ZERO
+                return error
         elif device_type_id == self.scanner.SWITCH_ID:
             error = self.devices.make_device(device_id, self.devices.SWITCH, device_property=self.symbol.id)
             if error in [self.devices.NO_QUALIFIER, self.devices.INVALID_QUALIFIER]:
                 error = self.NOT_BIT
+                return error
             elif error == self.devices.NO_ERROR:
                 error = self.NO_ERROR
 
@@ -314,7 +316,32 @@ class Parser:
             # Error: invalid device name
             # print("Invalid device name")
             return self.INVALID_NAME
-    
+
+    def monitor_list(self):
+        # print('before first device', self.scanner.current_character)
+        # Parse the first device
+        error = self.monitor()
+        # print('after first device', self.scanner.current_character)
+        while self.symbol.type == self.scanner.COMMA:
+            self.symbol = self.scanner.get_symbol()
+            print("Current line", self.scanner.line_number)
+            error = self.device()
+            # print("prior parent value", self.parent)
+            if error != self.NO_ERROR:
+                # print("parent value", self.parent)
+                self.error(error)
+
+            if self.parent == None:
+                return
+
+        if self.symbol.type == self.scanner.SEMICOLON:
+            # End of connection list
+            self.symbol = self.scanner.get_symbol()
+
+        else:
+            print("The line issue", self.scanner.line_number)
+            # Error: expected semicolon
+            self.error(self.NO_SEMICOLON)
 
     def connection(self):
         """Parse a single connection."""
@@ -399,8 +426,21 @@ class Parser:
             self.error(self.NO_SEMICOLON)
 
         return
-    
+
+    def connection(self):
+        """Parse a single connection."""
+
+        # Get the input device and port number
+        in_signal = self.in_signame()
+        if type(in_signal) == int:
+            # error has occured
+            # print("error in in_signal")
+            return in_signal
+        else:
+            [in_device_id, in_port_id] = in_signal
+
     def monitor_list(self):
+
         return
 
     def error(self, error_type):
