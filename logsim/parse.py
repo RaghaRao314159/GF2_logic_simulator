@@ -192,7 +192,7 @@ class Parser:
 
 
 
-    def device_list(self):
+    def device_list2(self):
         # print('before first device', self.scanner.current_character)
         # Parse the first device
         error = self.device()
@@ -215,6 +215,37 @@ class Parser:
         else:
             # Error: expected semicolon
             self.error(self.NO_SEMICOLON)
+
+        return
+
+    def device_list(self):
+        # print('before first device', self.scanner.current_character)
+        # Parse the first device
+        error = self.device()
+        # print('after first device', self.scanner.current_character)
+        while True:
+            if self.symbol.type == self.scanner.COMMA:
+                self.symbol = self.scanner.get_symbol()
+                error = self.device()
+                # print("prior parent value", self.parent)
+                if error != self.NO_ERROR:
+                    # print("parent value", self.parent)
+                    self.error(error)
+
+                if self.parent == None:
+                    return
+
+            elif self.symbol.type == self.scanner.SEMICOLON:
+                # End of connection list
+                self.symbol = self.scanner.get_symbol()
+                break
+
+            else:
+                # Error: expected semicolon
+                self.error(self.NO_SEMICOLON)
+            
+            if self.parent == None:
+                return
 
         return
 

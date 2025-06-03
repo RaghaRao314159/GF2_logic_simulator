@@ -10,8 +10,8 @@ DEVICES D1:DTYPE,
         D2:DTYPE 3, # error as DTYPE should not be an error
         N1:NAD 2, # error as NAND is spelt incorrectly
         C1:CLOCK -8, # error as - is an invalid symbol
-        S2:SWITCH 1 # error as comma missed
         S1:SWITCH 2, # error as switch only takes a bit
+        S2:SWITCH 1 # error as comma missed
         S3.SWITCH 0 ; # error as should not have a dot
 
 /* connect inputs and outputs */
