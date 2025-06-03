@@ -464,6 +464,59 @@ class Parser:
             return self.INVALID_NAME
 
 
+    def monitor(self):
+        """Parse a signal name and return the device and port IDs."""
+        # TODO: What happens when the output is defined with no dot?
+
+        # Valid device name, get the next symbol
+        device_id = self.symbol.id
+
+        self.symbol = self.scanner.get_symbol()
+
+        if self.symbol.type == self.scanner.DOT:
+
+            # Found a dot, get the port number
+            self.symbol = self.scanner.get_symbol()
+
+            # Found a number, this is the port number
+            port_id = self.symbol.id
+
+            error = self.monitors.make_monitor(device_id, port_id)
+
+            self.symbol = self.scanner.get_symbol()
+
+            return error
+
+        else:
+            error = self.monitors.make_monitor(device_id, None)
+            return error
+
+    def monitor_list(self):
+        # print('before first device', self.scanner.current_character)
+        # Parse the first device
+        error = self.monitor()
+        # print('after first device', self.scanner.current_character)
+        while self.symbol.type == self.scanner.COMMA:
+            self.symbol = self.scanner.get_symbol()
+            error = self.monitor()
+            # print("prior parent value", self.parent)
+            if error != self.NO_ERROR:
+                # print("parent value", self.parent)
+                self.error(error)
+
+            if self.parent == None:
+                return
+
+        if self.symbol.type == self.scanner.SEMICOLON:
+            # End of connection list
+            self.symbol = self.scanner.get_symbol()
+
+        else:
+            # Error: expected semicolon
+            self.error(self.NO_SEMICOLON)
+
+        return
+
     def error(self, error_type):
         """Handle errors in the definition file."""
         self.error_count += 1
