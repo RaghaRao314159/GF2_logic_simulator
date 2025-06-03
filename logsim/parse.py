@@ -84,7 +84,7 @@ class Parser:
             elif self.symbol.id == self.scanner.MONITOR_ID:
                 self.parent = 'M'
                 self.symbol = self.scanner.get_symbol()
-                self.monitor_list()
+                #self.monitor_list()
 
             elif self.symbol.id == self.scanner.END_ID:
                 self.symbol = self.scanner.get_symbol()
@@ -317,32 +317,6 @@ class Parser:
             # print("Invalid device name")
             return self.INVALID_NAME
 
-    def monitor_list(self):
-        # print('before first device', self.scanner.current_character)
-        # Parse the first device
-        error = self.monitor()
-        # print('after first device', self.scanner.current_character)
-        while self.symbol.type == self.scanner.COMMA:
-            self.symbol = self.scanner.get_symbol()
-            print("Current line", self.scanner.line_number)
-            error = self.device()
-            # print("prior parent value", self.parent)
-            if error != self.NO_ERROR:
-                # print("parent value", self.parent)
-                self.error(error)
-
-            if self.parent == None:
-                return
-
-        if self.symbol.type == self.scanner.SEMICOLON:
-            # End of connection list
-            self.symbol = self.scanner.get_symbol()
-
-        else:
-            print("The line issue", self.scanner.line_number)
-            # Error: expected semicolon
-            self.error(self.NO_SEMICOLON)
-
     def connection(self):
         """Parse a single connection."""
 
@@ -427,21 +401,37 @@ class Parser:
 
         return
 
-    def connection(self):
-        """Parse a single connection."""
+    def monitor_signame(self):
+        """Parse a signal name and return the device and port IDs."""
+        # TODO: What happens when the output is defined with no dot?
 
-        # Get the input device and port number
-        in_signal = self.in_signame()
-        if type(in_signal) == int:
-            # error has occured
-            # print("error in in_signal")
-            return in_signal
+        if self.symbol.type == self.scanner.NAME:
+            # Valid device name, get the next symbol
+            device_id = self.symbol.id
+
+            self.symbol = self.scanner.get_symbol()
+            device_type_id = self.devices.get_device(device_id).device_kind
+
+            if self.symbol.type == self.scanner.DOT:
+
+                # Found a dot, get the port number
+                self.symbol = self.scanner.get_symbol()
+
+                # Found a number, this is the port number
+                port_id = self.symbol.id
+
+                self.monitors.make_monitor(device_id, port_id)
+
+                self.symbol = self.scanner.get_symbol()
+
+
+            else:
+                self.monitors.make_monitor(device_id, None)
+
         else:
-            [in_device_id, in_port_id] = in_signal
+            # Error: invalid device name
+            return self.INVALID_NAME
 
-    def monitor_list(self):
-
-        return
 
     def error(self, error_type):
         """Handle errors in the definition file."""

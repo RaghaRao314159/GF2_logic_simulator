@@ -34,3 +34,5 @@ MONITOR D1.QBAR,
 
 /* error as END is spelt incorrectly below */
 ED
+
+D1.S1
