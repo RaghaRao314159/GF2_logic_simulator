@@ -29,7 +29,7 @@ CONNECT S1 > X1.I1,
         O1 > NO1.I2 ;
 
 /* monitor particular signals */
-MONITOR X2, # this is the summer bit
+MONITOR X2, # this is the summed bit
         O1, # this is the carry bit
         NO1 ;
 

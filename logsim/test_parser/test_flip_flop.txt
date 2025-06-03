@@ -10,7 +10,9 @@ DEVICES D1:DTYPE,
         C1:CLOCK 8, # Period is a power of 2
         S1:SWITCH 0, 
         S2:SWITCH 1,
-        S3:SWITCH 0 ;
+        A5:AND 2,
+        S3:SWITCH 0,
+        A6:AND - ;
 
 /* connect inputs and outputs */
 CONNECT S1 > D1.SET,
@@ -18,6 +20,8 @@ CONNECT S1 > D1.SET,
         S2 > D1.DATA,
         S3 > D1.CLEAR,
         S3 > D2.CLEAR,
+        C1 > A5.I1,
+        S2 > A5.I2,
 
         C1 > D1.CLK,
         C1 > D2.CLK,
@@ -27,7 +31,7 @@ CONNECT S1 > D1.SET,
         D2.QBAR > N1.I2 ;
 
 /* monitor certain signals */
-MONITOR D1.QBAR, 
-        N1 ;
+MONITOR D1.Q, 
+        A5.I1 ;
 
-END 
+ED 

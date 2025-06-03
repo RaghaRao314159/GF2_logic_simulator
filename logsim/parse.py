@@ -55,7 +55,8 @@ class Parser:
             self.NO_ERROR, self.QUALIFIER_PRESENT, self.INVALID_RANGE, self.NO_DOT, self.DOT,
             self.INVALID_CONNECTION_SC, self.DEVICE_ABSENT, self.INPUT_CONNECTED,
             self.INPUT_TO_INPUT, self.PORT_ABSENT, self.OUTPUT_TO_OUTPUT, self.NOT_CONNECTED,
-            self.INVALID_PORT, self.INVALID_PORT_DTYPE, self.INVALID_PORT_XOR, self.NOT_I_PORT, self.PORT_OUT_RANGE, self.NOT_END] = range(30)
+            self.INVALID_PORT, self.INVALID_PORT_DTYPE, self.INVALID_PORT_XOR, self.NOT_I_PORT,
+            self.PORT_OUT_RANGE, self.NOT_END, self.REPEATED_MONITOR] = range(31)
         
         self.dot_signals = {"IN": [self.devices.D_TYPE],
                             "OUT": [self.devices.D_TYPE, self.devices.XOR, self.devices.AND, self.devices.NAND, self.devices.OR, self.devices.NOR] }
@@ -425,38 +426,59 @@ class Parser:
                 error = self.monitors.make_monitor(device_id, port_id)
 
                 self.symbol = self.scanner.get_symbol()
-
+                if error == self.network.DEVICE_ABSENT:
+                    error = self.DEVICE_ABSENT
+                elif error == self.monitors.NOT_OUTPUT:
+                    error = self.INVALID_PORT
+                elif error == self.monitors.MONITOR_PRESENT:
+                    error = self.REPEATED_MONITOR
+                elif error == self.monitors.NO_ERROR:
+                    error = self.NO_ERROR
                 return error
 
             else:
                 error = self.monitors.make_monitor(device_id, None)
+                if error == self.network.DEVICE_ABSENT:
+                    error = self.DEVICE_ABSENT
+                elif error == self.monitors.NOT_OUTPUT:
+                    error = self.INVALID_PORT
+                elif error == self.monitors.MONITOR_PRESENT:
+                    error = self.REPEATED_MONITOR
+                elif error == self.monitors.NO_ERROR:
+                    error = self.NO_ERROR
                 return error
         else:
             return self.INVALID_NAME
 
     def monitor_list(self):
         # print('before first device', self.scanner.current_character)
+        # print('before first device', self.scanner.current_character)
         # Parse the first device
         error = self.monitor()
         # print('after first device', self.scanner.current_character)
-        while self.symbol.type == self.scanner.COMMA:
-            self.symbol = self.scanner.get_symbol()
-            error = self.monitor()
-            # print("prior parent value", self.parent)
-            if error != self.NO_ERROR:
-                # print("parent value", self.parent)
-                self.error(error)
+        while True:
+            if self.symbol.type == self.scanner.COMMA:
+                self.symbol = self.scanner.get_symbol()
+                error = self.monitor()
+                # print("prior parent value", self.parent)
+                if error != self.NO_ERROR:
+                    # print("parent value", self.parent)
+                    self.error(error)
 
+                if self.parent == None:
+                    return
+
+            elif self.symbol.type == self.scanner.SEMICOLON:
+                # End of connection list
+                self.symbol = self.scanner.get_symbol()
+                break
+
+            else:
+                # Error: expected semicolon
+                self.error(self.NO_SEMICOLON)
+            
             if self.parent == None:
                 return
-
-        if self.symbol.type == self.scanner.SEMICOLON:
-            # End of connection list
-            self.symbol = self.scanner.get_symbol()
-
-        else:
-            # Error: expected semicolon
-            self.error(self.NO_SEMICOLON)
 
         return
 
@@ -517,13 +539,20 @@ class Parser:
             print("Invalid port number for XOR device")
         elif error_type == self.NOT_END:
             print("Expected 'END' keyword")
+        elif error_type == self.REPEATED_MONITOR:
+            print("Signal cannot be monitored twice")
         else:
             print("Unknown error")
 
         print(f"LINE {self.symbol.line_number}:")
         print(self.scanner.print_error(self.symbol))
         print()
-
+        
+        if self.symbol.type == self.scanner.SEMICOLON:
+            self.symbol = self.scanner.get_symbol()
+            self.parent = None
+            return
+        
         while self.symbol.type != self.scanner.EOF:
             self.symbol = self.scanner.get_symbol()
 
