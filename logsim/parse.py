@@ -95,11 +95,15 @@ class Parser:
                 self.error(self.NO_INITIALISATION_KEYWORD)
             self.parent = None
 
+        if self.error_count > 0:
+            print(f"Summary: {self.error_count} error/s found")
+            return False
+        
         return True
 
 
     def end_of_file(self):
-        if self.scanner.type != self.scanner.EOF:
+        if self.symbol.type != self.scanner.EOF:
             self.error(self.NOT_END)
 
         return
@@ -264,13 +268,13 @@ class Parser:
             # Valid device name, get the next symbol
             device_id = self.symbol.id
             if self.devices.get_device(device_id) == None:
-                print("Device not found")
+                # print("Device not found")
                 return self.DEVICE_ABSENT
 
             device_type_id = self.devices.get_device(device_id).device_kind
 
             if device_type_id in [self.devices.SWITCH, self.devices.CLOCK]:
-                print("Invalid connection to SWITCH or CLOCK")
+                # print("Invalid connection to SWITCH or CLOCK")
                 return self.INVALID_CONNECTION_SC
             
             self.symbol = self.scanner.get_symbol()
@@ -283,19 +287,19 @@ class Parser:
 
                 if port_id not in self.devices.get_device(device_id).inputs.keys():
                     if device_type_id == self.devices.D_TYPE:
-                            print("Invalid port number for D-type device")        
+                            # print("Invalid port number for D-type device")        
                             return self.INVALID_PORT_DTYPE      
 
                     elif device_type_id == self.devices.XOR:
-                            print("Invalid port number for XOR device")        
+                            # print("Invalid port number for XOR device")        
                             return self.INVALID_PORT_XOR  
                      
                     else: 
                         name = self.names.get_name_string(self.symbol.id)
                         if name[0] != 'I':
-                            print("Port is not an input port")
+                            # print("Port is not an input port")
                             return self.NOT_I_PORT
-                        print("Port number out of range")
+                        # print("Port number out of range")
                         return self.PORT_OUT_RANGE
                 
                 self.symbol = self.scanner.get_symbol()
@@ -303,12 +307,12 @@ class Parser:
 
             else:
                 # Error: expected a dot after the device name
-                print("Expected a dot after the device name")
+                # print("Expected a dot after the device name")
                 return self.NO_DOT
 
         else:
             # Error: invalid device name
-            print("Invalid device name")
+            # print("Invalid device name")
             return self.INVALID_NAME
     
 
@@ -319,7 +323,7 @@ class Parser:
         in_signal = self.in_signame()
         if type(in_signal) == int:
             # error has occured
-            print("error in in_signal")
+            # print("error in in_signal")
             return in_signal
         else:
             [in_device_id, in_port_id] = in_signal
@@ -338,7 +342,7 @@ class Parser:
         out_signal = self.out_signame()
         if type(out_signal) == int:
             # error has occured
-            print("error in out_signal")
+            # print("error in out_signal")
             return out_signal
         else:
             [out_device_id, out_port_id] = out_signal
@@ -346,19 +350,19 @@ class Parser:
         # if self.error_count == 0:
         error_type = self.network.make_connection(in_device_id, in_port_id, out_device_id, out_port_id)
         if error_type == self.network.DEVICE_ABSENT:
-            print("Device not found")
+            # print("Device not found")
             return self.DEVICE_ABSENT
         elif error_type == self.network.INPUT_CONNECTED:
-            print("Input already connected")
+            # print("Input already connected")
             return self.INPUT_CONNECTED
         elif error_type == self.network.INPUT_TO_INPUT:
-            print("Input cannot be connected to another input")
+            # print("Input cannot be connected to another input")
             return self.INPUT_TO_INPUT
         elif error_type == self.network.PORT_ABSENT:
-            print("Port not found")
+            # print("Port not found")
             return self.PORT_ABSENT
         elif error_type == self.network.OUTPUT_TO_OUTPUT:
-            print("Output cannot be connected to another output")
+            # print("Output cannot be connected to another output")
             return self.OUTPUT_TO_OUTPUT
 
         return self.NO_ERROR
@@ -368,7 +372,7 @@ class Parser:
         # Parse the first device
         error = self.connection()
         if error !=  self.NO_ERROR:
-            print("connection has error")
+            # print("connection has error")
             self.error(error)
 
         if self.parent == None:
@@ -380,7 +384,7 @@ class Parser:
             self.symbol = self.scanner.get_symbol()
             error = self.connection()
             if error !=  self.NO_ERROR:
-                print("connection has error")
+                # print("connection has error")
                 self.error(error)
 
             if self.parent == None:
@@ -394,6 +398,9 @@ class Parser:
             # Error: expected semicolon
             self.error(self.NO_SEMICOLON)
 
+        return
+    
+    def monitor_list(self):
         return
 
     def error(self, error_type):
@@ -456,7 +463,9 @@ class Parser:
         else:
             print("Unknown error")
 
+        print(f"LINE {self.symbol.line_number}:")
         print(self.scanner.print_error(self.symbol))
+        print()
 
         while self.symbol.type != self.scanner.EOF:
             self.symbol = self.scanner.get_symbol()
@@ -474,7 +483,8 @@ class Parser:
                 self.parent = None
                 if not stopping_punctuation_flag:
                     self.error_count += 1
-                    print("Expected a semicolon")
+                    print("Expected a semicolon prior to this:")
+                    self.scanner.print_error(self.symbol)
                 return
 
 

@@ -1,4 +1,4 @@
-"""Test the devices module."""
+"""Test the scanner module."""
 import pytest
 import os
 from names import Names
