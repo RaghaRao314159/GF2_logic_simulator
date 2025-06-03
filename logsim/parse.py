@@ -408,29 +408,31 @@ class Parser:
     def monitor(self):
         """Parse a signal name and return the device and port IDs."""
         # TODO: What happens when the output is defined with no dot?
-
-        # Valid device name, get the next symbol
-        device_id = self.symbol.id
-
-        self.symbol = self.scanner.get_symbol()
-
-        if self.symbol.type == self.scanner.DOT:
-
-            # Found a dot, get the port number
-            self.symbol = self.scanner.get_symbol()
-
-            # Found a number, this is the port number
-            port_id = self.symbol.id
-
-            error = self.monitors.make_monitor(device_id, port_id)
+        if self.symbol.type == self.scanner.NAME:
+            # Valid device name, get the next symbol
+            device_id = self.symbol.id
 
             self.symbol = self.scanner.get_symbol()
 
-            return error
+            if self.symbol.type == self.scanner.DOT:
 
+                # Found a dot, get the port number
+                self.symbol = self.scanner.get_symbol()
+
+                # Found a number, this is the port number
+                port_id = self.symbol.id
+
+                error = self.monitors.make_monitor(device_id, port_id)
+
+                self.symbol = self.scanner.get_symbol()
+
+                return error
+
+            else:
+                error = self.monitors.make_monitor(device_id, None)
+                return error
         else:
-            error = self.monitors.make_monitor(device_id, None)
-            return error
+            return self.INVALID_NAME
 
     def monitor_list(self):
         # print('before first device', self.scanner.current_character)
