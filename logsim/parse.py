@@ -84,7 +84,7 @@ class Parser:
             elif self.symbol.id == self.scanner.MONITOR_ID:
                 self.parent = 'M'
                 self.symbol = self.scanner.get_symbol()
-                #self.monitor_list()
+                self.monitor_list()
 
             elif self.symbol.id == self.scanner.END_ID:
                 self.symbol = self.scanner.get_symbol()
@@ -189,34 +189,6 @@ class Parser:
 
         else:
             return self.INVALID_NAME
-
-
-
-    def device_list2(self):
-        # print('before first device', self.scanner.current_character)
-        # Parse the first device
-        error = self.device()
-        # print('after first device', self.scanner.current_character)
-        while self.symbol.type == self.scanner.COMMA:
-            self.symbol = self.scanner.get_symbol()
-            error = self.device()
-            # print("prior parent value", self.parent)
-            if error != self.NO_ERROR:
-                # print("parent value", self.parent)
-                self.error(error)
-
-            if self.parent == None:
-                return
-
-        if self.symbol.type == self.scanner.SEMICOLON:
-            # End of connection list
-            self.symbol = self.scanner.get_symbol()
-
-        else:
-            # Error: expected semicolon
-            self.error(self.NO_SEMICOLON)
-
-        return
 
     def device_list(self):
         # print('before first device', self.scanner.current_character)
@@ -431,37 +403,6 @@ class Parser:
             self.error(self.NO_SEMICOLON)
 
         return
-
-    def monitor_signame(self):
-        """Parse a signal name and return the device and port IDs."""
-        # TODO: What happens when the output is defined with no dot?
-
-        if self.symbol.type == self.scanner.NAME:
-            # Valid device name, get the next symbol
-            device_id = self.symbol.id
-
-            self.symbol = self.scanner.get_symbol()
-            device_type_id = self.devices.get_device(device_id).device_kind
-
-            if self.symbol.type == self.scanner.DOT:
-
-                # Found a dot, get the port number
-                self.symbol = self.scanner.get_symbol()
-
-                # Found a number, this is the port number
-                port_id = self.symbol.id
-
-                self.monitors.make_monitor(device_id, port_id)
-
-                self.symbol = self.scanner.get_symbol()
-
-
-            else:
-                self.monitors.make_monitor(device_id, None)
-
-        else:
-            # Error: invalid device name
-            return self.INVALID_NAME
 
 
     def monitor(self):
