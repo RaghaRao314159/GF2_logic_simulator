@@ -225,11 +225,11 @@ class Parser:
 
             self.symbol = self.scanner.get_symbol()
             device_type_id = self.devices.get_device(device_id).device_kind
-            print("device type id", device_type_id, self.dot_signals["IN"])
 
             if device_type_id not in self.dot_signals["IN"]:
                 if self.symbol.type == self.scanner.DOT:
                     return self.DOT
+                
                 return [device_id, None]
 
             
@@ -244,6 +244,7 @@ class Parser:
                 if port_id not in [self.scanner.Q_ID, self.scanner.QBAR_ID]:
                     return self.INVALID_PORT
 
+                self.symbol = self.scanner.get_symbol()
                 return [device_id, port_id]
 
             else:
@@ -296,7 +297,8 @@ class Parser:
                             return self.NOT_I_PORT
                         print("Port number out of range")
                         return self.PORT_OUT_RANGE
-                    
+                
+                self.symbol = self.scanner.get_symbol()
                 return [device_id, port_id]
 
             else:
@@ -366,10 +368,8 @@ class Parser:
         # Parse the first device
         error = self.connection()
         if error !=  self.NO_ERROR:
-            # print("not no error")
+            print("connection has error")
             self.error(error)
-        else:
-            self.symbol = self.scanner.get_symbol()
 
         if self.parent == None:
             return
@@ -380,13 +380,11 @@ class Parser:
             self.symbol = self.scanner.get_symbol()
             error = self.connection()
             if error !=  self.NO_ERROR:
+                print("connection has error")
                 self.error(error)
-            else:
-                self.symbol = self.scanner.get_symbol()
 
             if self.parent == None:
                 return
-            
 
         if self.symbol.type == self.scanner.SEMICOLON:
             # End of connection list
