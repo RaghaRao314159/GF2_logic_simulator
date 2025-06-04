@@ -562,12 +562,6 @@ class Parser:
         print(self.scanner.print_error(self.symbol))
         print()
 
-
-
-
-
-
-        
         if self.symbol.type == self.scanner.COMMA:
             return
 
