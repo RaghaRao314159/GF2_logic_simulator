@@ -42,28 +42,56 @@ def parser_with_flip_flop():
     return parser, names, devices, network, monitors
 
 @pytest.fixture
-def parser_with_error_one():
+def parser_with_error_devices():
     """Return a parser instance with error test file one."""
     names = Names()
     devices = Devices(names)
     network = Network(names, devices)
     monitors = Monitors(names, devices, network)
-    
-    file_path = os.path.join(os.path.dirname(__file__), "test_parser", "test_print_error_one.txt")
+
+    file_path = os.path.join(os.path.dirname(__file__), "test_parser", "test_print_error_devices.txt")
     scanner = Scanner(file_path, names)
     parser = Parser(names, devices, network, monitors, scanner)
     
     return parser
 
 @pytest.fixture
-def parser_with_error_two():
+def parser_with_error_connection_syntax():
     """Return a parser instance with error test file two."""
     names = Names()
     devices = Devices(names)
     network = Network(names, devices)
     monitors = Monitors(names, devices, network)
+
+    file_path = os.path.join(os.path.dirname(__file__), "test_parser", "test_print_error_connection_syntax.txt")
+    scanner = Scanner(file_path, names)
+    parser = Parser(names, devices, network, monitors, scanner)
     
-    file_path = os.path.join(os.path.dirname(__file__), "test_parser", "test_print_error_two.txt")
+    return parser
+
+@pytest.fixture
+def parser_with_error_connection_semantic():
+    """Return a parser instance with error test file two."""
+    names = Names()
+    devices = Devices(names)
+    network = Network(names, devices)
+    monitors = Monitors(names, devices, network)
+
+    file_path = os.path.join(os.path.dirname(__file__), "test_parser", "test_print_error_connection_semantic.txt")
+    scanner = Scanner(file_path, names)
+    parser = Parser(names, devices, network, monitors, scanner)
+    
+    return parser
+
+@pytest.fixture
+def parser_with_error_monitor():
+    """Return a parser instance with error test file two."""
+    names = Names()
+    devices = Devices(names)
+    network = Network(names, devices)
+    monitors = Monitors(names, devices, network)
+
+    file_path = os.path.join(os.path.dirname(__file__), "test_parser", "test_print_error_monitor.txt")
     scanner = Scanner(file_path, names)
     parser = Parser(names, devices, network, monitors, scanner)
     
@@ -131,10 +159,10 @@ def test_monitor_connections_flip_flop(parser_with_flip_flop):
     assert "N1" in monitored_signals
     assert len(monitored_signals) == 2
 
-def test_parser_error_one(parser_with_error_one, capsys):
-    """Test if the parser correctly handles errors in test_print_error_one.txt."""
-    parser = parser_with_error_one
-    
+def test_parser_error_devices(parser_with_error_devices, capsys):
+    """Test if the parser correctly handles errors in test_print_error_devices.txt."""
+    parser = parser_with_error_devices
+
     # Parse the network which should contain errors
     assert not parser.parse_network()  # Should return False due to errors
     
@@ -144,7 +172,6 @@ def test_parser_error_one(parser_with_error_one, capsys):
     
     # Check for expected error messages
     expected_errors = ["Expected DEVICES, CONNECT, MONITOR or END", # ? before DEVICES leads to invalid character error
-                       "LINE 18",
                        "Expected a semicolon prior to this", # ? before DEVICES leads to missing semi-colon error
                         "Did not expect a parameter", # input parameter for DTYPE should not be specified
                         "Expected a device type",
@@ -157,18 +184,97 @@ def test_parser_error_one(parser_with_error_one, capsys):
                         "Expected DEVICES, CONNECT, MONITOR or END",
                         "Expected 'END' keyword before end of file"
     ]
+
+    expected_lines = [
+        "LINE 7:",
+        "LINE 9:",
+        "LINE 10:",
+        "LINE 11:",
+        "LINE 12:",
+        "LINE 13:",
+        "LINE 15:",
+        "LINE 18:",
+        "LINE 32:",
+        "LINE 33:",
+        "LINE 36:",
+        "LINE 36:"
+    ]
+
+    expected_indications = [
+        "? # leads to double error, invalid character and no semicolon\n^",
+        "DEVICES D1:DTYPE,\n^",
+        "        D2:DTYPE 3, # error as input parameter for DTYPE should not be specified\n                 ^",
+        "        N1:NAD 2, # error as NAND is spelt incorrectly\n           ^",
+        "        C1:CLOCK -8, # error as - is an invalid symbol\n                  ^",
+        "        S1:SWITCH 2, # error as switch only takes a bit\n                   ^",
+        "        S3:SWITCH 0 ;\n        ^",
+        "CONECT S1 > D1.SET, # error as connect is spelt incorrectly\n^",
+        "MONITOR D1.QBAR,\n^",
+        "        N1 ;\n           ^",
+        "ED\n^",
+        "ED\n  ^"
+    ]
     
     # Check that each expected error appears in the output
     for error in expected_errors:
         assert error in output, f"Expected error message '{error}' not found in output"
     
-    # Check total number of errors
-    #assert parser.error_count == len(expected_errors)
+    for line in expected_lines:
+        assert line in output, f"Expected '{line}' not found in output"
 
-def test_parser_error_two(parser_with_error_two, capsys):
-    """Test if the parser correctly handles errors in test_print_error_two.txt."""
-    parser = parser_with_error_two
+    for indication in expected_indications:
+        assert indication in output, f"Expected '{indication}' not found in output"
+
+    # Check total number of errors
+    assert parser.error_count == len(expected_errors)
+    assert parser.error_count == len(expected_lines)
+    assert parser.error_count == len(expected_indications)
+
+def test_parser_error_connection_syntax(parser_with_error_connection_syntax, capsys):
+    """Test if the parser correctly handles errors in test_print_error_connection_syntax.txt."""
+    parser = parser_with_error_connection_syntax
+
+    # Parse the network which should contain errors
+    assert not parser.parse_network()  # Should return False due to errors
     
+    # Get the captured output
+    captured = capsys.readouterr()
+    output = captured.out
+    # Check for expected error messages
+    expected_errors = [
+        "Output cannot be connected to another output",
+        "Port Absent, Invalid port for D-type device"
+    ]
+
+    expected_lines = [
+        "LINE 27:",
+        "LINE 28:"
+    ]
+
+    expected_indications = [
+        "        D2.Q > D1.Q, # Output cannot be connected to another output\n                  ^",
+        "        D2.Q > D1.PLATYPUS, # Port Absent, Invalid port for D-type device\n                  ^"
+    ]
+    
+    # Check that each expected error appears in the output
+    for error in expected_errors:
+        assert error in output, f"Expected error message '{error}' not found in output"
+    
+    for line in expected_lines:
+        assert line in output, f"Expected '{line}' not found in output"
+
+    for indication in expected_indications:
+        assert indication in output, f"Expected '{indication}' not found in output"
+
+    # Check total number of errors
+    assert parser.error_count == len(expected_errors)
+    assert parser.error_count == len(expected_lines)
+    assert parser.error_count == len(expected_indications)
+
+def test_parser_error_connection_semantic(parser_with_error_connection_semantic, capsys):
+    """Test if the parser correctly handles errors in test_print_error_connection_semantic.txt."""
+    parser = parser_with_error_connection_semantic
+
     # Parse the network which should contain errors
     assert not parser.parse_network()  # Should return False due to errors
     
@@ -178,21 +284,133 @@ def test_parser_error_two(parser_with_error_two, capsys):
     
     # Check for expected error messages
     expected_errors = [
-        "Expected a colon",  # For X1.XOR
-        "Expected an arrow",  # For S1 A1.I1
-        "Expected a dot",  # For X2 I2
-        "Did not expect a dot",  # For S3.I1
-        "Port Absent, Port is not a valid gate input port",  # For NO1.P1
-        "Invalid device name",  # For 2F2
-        "Port number out of range",  # For O1.I5
-        "Connection should not be made to SWITCH or CLOCK",  # For O1 > S1
-        "Input has already been connected",  # For S1 > NO1.I2
-        "Output cannot be connected to another output"  # For NO1.I2 > O1.I1
+        "Expected a colon",
+        "Expected an arrow",
+        "Device not found",
+        "Device not found",
+        "Output cannot be connected to another output",
+        "Did not expect a dot",
+        "Device not found",
+        "Device not found",
+        "Port Absent, Port is not a valid gate input port",
+        "Invalid device name",
+        "Port number out of range",
+        "Connection should not be made to SWITCH or CLOCK",
+        "Input has already been connected",
+        "Input has already been connected",
+        "Input cannot be connected to another input",
+        "Expected a semicolon prior to this"
+    ]
+
+    expected_lines = [
+        "LINE 4:",
+        "LINE 15:",
+        "LINE 16:",
+        "LINE 18:",
+        "LINE 20:",
+        "LINE 21:",
+        "LINE 23:",
+        "LINE 24:",
+        "LINE 25:",
+        "LINE 27:",
+        "LINE 28:",
+        "LINE 31:",
+        "LINE 33:",
+        "LINE 34:",
+        "LINE 35:",
+        "LINE 39:"
+    ]
+
+    expected_indications = [
+        "        DEVICES X1.XOR, # expected a colon error\n                  ^",
+        "        CONNECT S1  A1.I1, # missing arrow\n                    ^",
+        "                S1 > X1.I1,\n                     ^",
+        "                S2 > X1.I2,\n                     ^",
+        "                S3 > X2 I2, # missing dot\n                        ^",
+        "                S3.I1 > A2.I2, # did not expect dot\n                  ^",
+        "                X1 > X2.I1,\n                ^",
+        "                X1 > A2.I1,\n                ^",
+        "                X2 > NO1.P1, # invalid port\n                         ^",
+        "                2F2 > O1.I1, # invalid device name\n                ^",
+        "                A2 > O1.I5, # invalid range\n                        ^",
+        "                O1 > S1  , # Connection should not be made to SWITCH or CLOCK\n                     ^",
+        "                S1 > NO1.I2, # Input has already been connected\n                           ^",
+        "                S2 > NO1.I2, # Input has already been connected\n                           ^",
+        "                NO1.I2 > O1.I1 # Output cannot be connected to another output\n                   ^",
+        "        MONITOR X2, # this is the summed bit\n        ^"
     ]
     
     # Check that each expected error appears in the output
     for error in expected_errors:
         assert error in output, f"Expected error message '{error}' not found in output"
     
+    for line in expected_lines:
+        assert line in output, f"Expected '{line}' not found in output"
+
+    for indication in expected_indications:
+        assert indication in output, f"Expected '{indication}' not found in output"
+
     # Check total number of errors
     assert parser.error_count == len(expected_errors)
+    assert parser.error_count == len(expected_lines)
+    assert parser.error_count == len(expected_indications)
+
+def test_parser_error_monitor(parser_with_error_monitor, capsys):
+    """Test if the parser correctly handles errors in test_print_error_monitor_syntax.txt."""
+    parser = parser_with_error_monitor
+
+    # Parse the network which should contain errors
+    assert not parser.parse_network()  # Should return False due to errors
+
+    # Get the captured output
+    captured = capsys.readouterr()
+    output = captured.out
+
+    # Check for expected error messages
+    expected_errors = [
+        "Expected number between 1 and 16 inclusive",
+        "Input cannot be connected to another input",
+        "Port Absent, Invalid port number for XOR device",
+        "Device not found",
+        "Port Absent, Port is not a valid gate input port",
+        "Device not found",
+        "Output cannot be connected to another output",
+        "Signal cannot be monitored twice"
+    ]
+
+    expected_lines = [
+        "LINE 6:",
+        "LINE 16:",
+        "LINE 17:",
+        "LINE 18:",
+        "LINE 20:",
+        "LINE 25:",
+        "LINE 29:",
+        "LINE 36:"
+    ]
+
+    expected_indications = [
+        "                A1:AND 17,\n                         ^",
+        "                X1.I1 > A1.I1,\n                  ^",
+        "                S2 > X1.Q,\n                        ^",
+        "                S2 > A1.I1,\n                     ^",
+        "                S3 > A2.P, # port absent, invalid for gates\n                        ^",
+        "                A1 > X2.PP # Port Absent, Invalid port number for XOR device\n                ^",
+        "                A2 > O1, # Output cannot be connected to another output\n                       ^",
+        "                O1, # Signal cannot be monitored twice\n                  ^"
+    ]
+
+    # Check that each expected error appears in the output
+    for error in expected_errors:
+        assert error in output, f"Expected error message '{error}' not found in output"
+
+    for line in expected_lines:
+        assert line in output, f"Expected '{line}' not found in output"
+
+    for indication in expected_indications:
+        assert indication in output, f"Expected '{indication}' not found in output"
+
+    # Check total number of errors
+    assert parser.error_count == len(expected_errors)
+    assert parser.error_count == len(expected_lines)
+    assert parser.error_count == len(expected_indications)

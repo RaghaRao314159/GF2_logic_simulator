@@ -580,6 +580,7 @@ class Parser:
         self.error_count += 1
         print("Expected 'END' keyword before end of file.") # tested
         print(f"LINE {self.symbol.line_number}:")
+        print(self.scanner.print_error(self.symbol))
         print()
         return
                 

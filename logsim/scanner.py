@@ -265,8 +265,10 @@ class Scanner:
         # dictionary of lines
         message = ""
         
-        if 1 <= symbol.line_number <= len(self.lines):
+        if 1 <= symbol.line_number <= len(self.lines)-1:
             message += (self.lines[symbol.line_number - 1] + " " * (symbol.position - 1) + "^")
+        elif symbol.line_number == len(self.lines):
+            message += (self.lines[symbol.line_number - 1] + '\n' +" " * (symbol.position - 1) + "^")
         else:
             message = "Line number out of range."
     
