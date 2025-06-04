@@ -113,7 +113,7 @@ def error_open_comment():
     # create class of empty names
     my_names = Names()
     # use os library to get path of file in Linux and Windows environments
-    file_path = os.path.join(os.path.dirname(__file__), "test_scanner", "test_open_comment_error.txt")
+    file_path = os.path.join(os.path.dirname(__file__), "test_scanner", "test_open_comment.txt")
     my_scanner = Scanner(file_path, my_names)
 
     # expected keywords to be detected

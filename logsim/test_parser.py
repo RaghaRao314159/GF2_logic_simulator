@@ -42,6 +42,36 @@ def parser_with_flip_flop():
     return parser, names, devices, network, monitors
 
 @pytest.fixture
+def parser_with_open_comments():
+    """Return a parser instance with open comments after END."""
+    names = Names()
+    devices = Devices(names)
+    network = Network(names, devices)
+    monitors = Monitors(names, devices, network)
+
+    # Create a test file path for open comments
+    file_path = os.path.join(os.path.dirname(__file__), "test_parser", "test_open_comment.txt")
+    scanner = Scanner(file_path, names)
+    parser = Parser(names, devices, network, monitors, scanner)
+    
+    return parser, names, devices, network, monitors
+
+@pytest.fixture
+def parser_with_closed_comments_error():
+    """Return a parser instance with closed comments not properly terminated."""
+    names = Names()
+    devices = Devices(names)
+    network = Network(names, devices)
+    monitors = Monitors(names, devices, network)
+
+    # Create a test file path for closed comments error
+    file_path = os.path.join(os.path.dirname(__file__), "test_parser", "test_closed_comment_error.txt")
+    scanner = Scanner(file_path, names)
+    parser = Parser(names, devices, network, monitors, scanner)
+    
+    return parser, names, devices, network, monitors
+
+@pytest.fixture
 def parser_with_error_devices():
     """Return a parser instance with error test file one."""
     names = Names()
@@ -133,6 +163,36 @@ def test_monitor_connections_flip_flop(parser_with_flip_flop):
     """Test if the parser correctly handles monitor connections for the flip-flop circuit."""
     parser, names, devices, network, monitors = parser_with_flip_flop
     
+    # Parse the network which includes monitor definitions
+    parser.parse_network()
+    
+    # Get the device IDs we expect to be monitored based on test_flip_flop.txt
+    [D1_ID, N1_ID, QBAR_ID] = names.lookup(["D1", "N1", "QBAR"])
+    
+    # Check that the monitors dictionary contains the expected monitors
+    # Note: D1.QBAR is monitored, so we need to check for (D1_ID, QBAR_ID)
+    assert (D1_ID, QBAR_ID) in monitors.monitors_dictionary
+    assert (N1_ID, None) in monitors.monitors_dictionary
+    
+    # Check that the monitors dictionary has the correct structure
+    assert monitors.monitors_dictionary[(D1_ID, QBAR_ID)] == []
+    assert monitors.monitors_dictionary[(N1_ID, None)] == []
+    
+    # Verify that only these two devices are being monitored
+    assert len(monitors.monitors_dictionary) == 2
+    
+    # Get the monitored signal names
+    monitored_signals, _ = monitors.get_signal_names()
+    
+    # Verify the correct signals are being monitored
+    assert "D1.QBAR" in monitored_signals
+    assert "N1" in monitored_signals
+    assert len(monitored_signals) == 2
+
+def test_monitor_connections_open_comments(parser_with_open_comments):
+    """Test if the parser correctly handles monitor connections for the flip-flop circuit."""
+    parser, names, devices, network, monitors = parser_with_open_comments
+
     # Parse the network which includes monitor definitions
     parser.parse_network()
     
@@ -398,6 +458,58 @@ def test_parser_error_monitor(parser_with_error_monitor, capsys):
         "                A1 > X2.PP # Port Absent, Invalid port number for XOR device\n                ^",
         "                A2 > O1, # Output cannot be connected to another output\n                       ^",
         "                O1, # Signal cannot be monitored twice\n                  ^"
+    ]
+
+    # Check that each expected error appears in the output
+    for error in expected_errors:
+        assert error in output, f"Expected error message '{error}' not found in output"
+
+    for line in expected_lines:
+        assert line in output, f"Expected '{line}' not found in output"
+    
+    for indication in expected_indications:
+        assert indication in output, f"Expected '{indication}' not found in output"
+
+
+def test_parser_closed_comment_error(parser_with_closed_comments_error, capsys):
+    """Test if the parser correctly handles errors in test_closed_comment_error.txt."""
+    parser, *_ = parser_with_closed_comments_error
+
+    # Parse the network which should contain errors
+    assert not parser.parse_network()  # Should return False due to errors
+
+    # Get the captured output
+    captured = capsys.readouterr()
+    output = captured.out
+
+    expected_errors = [
+        "Device not found"
+    ] * 10
+
+    expected_lines = [
+        "LINE 16:",
+        "LINE 17:",
+        "LINE 18:",
+        "LINE 19:",
+        "LINE 20:",
+        "LINE 22:",
+        "LINE 23:",
+        "LINE 25:",
+        "LINE 26:",
+        "LINE 27:"
+    ]
+
+    expected_indications = [
+        "CONNECT S1 > D1.SET,\n        ^",
+        "        S1 > D2.SET,\n        ^",
+        "        S2 > D1.DATA,\n        ^",
+        "        S3 > D1.CLEAR,\n        ^",
+        "        S3 > D2.CLEAR,\n        ^",
+        "        C1 > D1.CLK,\n        ^",
+        "        C1 > D2.CLK,\n        ^",
+        "        D1.Q > D2.DATA,\n        ^",
+        "        D2.Q > N1.I1,\n        ^",
+        "        D2.QBAR > N1.I2 ;\n        ^"
     ]
 
     # Check that each expected error appears in the output

@@ -7,7 +7,7 @@
 DEVICES D1:DTYPE, 
         D2:DTYPE, 
         N1:NAND 2,
-        C1:CLOCK 8, # This denotes half-period of cycle
+        C1:CLOCK 8, # Period is a power of 2
         S1:SWITCH 0, 
         S2:SWITCH 1,
         S3:SWITCH 0 ;
