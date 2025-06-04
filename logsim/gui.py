@@ -336,6 +336,15 @@ class Gui(wx.Frame):
         self.devices = devices
         self.monitors = monitors
         self.network = network
+        
+        # Add simulation speed settings
+        self.speed_settings = {
+            'x1': 400,  # 400ms
+            'x2': 200,  # 200ms
+            'x4': 100,  # 100ms
+            'x8': 50    # 50ms
+        }
+        self.current_speed = 'x1'  # Start at slowest speed
 
         # Configure the file menu
         fileMenu = wx.Menu()
@@ -370,6 +379,14 @@ class Gui(wx.Frame):
         sim_box = wx.StaticBox(control_panel, label="Simulation Controls")
         sim_sizer = wx.StaticBoxSizer(sim_box, wx.VERTICAL)
         
+        # Add speed control at the top
+        speed_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.speed_btn = wx.Button(control_panel, label=self.current_speed, size=(60, 25))
+        speed_label = wx.StaticText(control_panel, label="Speed:")
+        speed_sizer.Add(speed_label, 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 5)
+        speed_sizer.Add(self.speed_btn, 0)
+        sim_sizer.Add(speed_sizer, 0, wx.ALIGN_RIGHT | wx.ALL, 5)
+        
         # Cycles control
         cycles_label = wx.StaticText(control_panel, label="Number of Cycles:")
         self.cycles_spin = wx.SpinCtrl(control_panel, value="10", min=1, max=1000)
@@ -394,10 +411,14 @@ class Gui(wx.Frame):
         self.switch_list = wx.ListCtrl(control_panel, style=wx.LC_REPORT)
         self.switch_list.InsertColumn(0, "Switch")
         self.switch_list.InsertColumn(1, "State")
+        # Enable multiple selection
+        current_style = self.switch_list.GetWindowStyle()
+        self.switch_list.SetWindowStyle(current_style | wx.LC_SINGLE_SEL)
+        self.switch_list.SetWindowStyle(current_style & ~wx.LC_SINGLE_SEL)
         
         # Add toggle button
-        self.toggle_switch_btn = wx.Button(control_panel, label="Toggle Switch")
-        self.toggle_switch_btn.Disable()  # Initially disabled until a switch is selected
+        self.toggle_switch_btn = wx.Button(control_panel, label="Toggle Selected")
+        self.toggle_switch_btn.Disable()  # Initially disabled until switches are selected
         
         # Add components to switch sizer
         switch_sizer.Add(self.switch_list, 1, wx.EXPAND | wx.ALL, 5)
@@ -411,6 +432,10 @@ class Gui(wx.Frame):
         self.monitor_list.InsertColumn(0, "Device")
         self.monitor_list.InsertColumn(1, "Output")
         self.monitor_list.InsertColumn(2, "State")
+        # Enable multiple selection
+        current_style = self.monitor_list.GetWindowStyle()
+        self.monitor_list.SetWindowStyle(current_style | wx.LC_SINGLE_SEL)
+        self.monitor_list.SetWindowStyle(current_style & ~wx.LC_SINGLE_SEL)
         
         # Add/Remove monitor buttons
         monitor_btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -449,6 +474,7 @@ class Gui(wx.Frame):
         self.remove_monitor_btn.Bind(wx.EVT_BUTTON, self.on_remove_monitor)
         self.toggle_switch_btn.Bind(wx.EVT_BUTTON, self.on_toggle_switch)
         self.switch_list.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_switch_selected)
+        self.speed_btn.Bind(wx.EVT_BUTTON, self.on_speed_button)
         
         # Initialize lists
         self.update_switch_list()
@@ -513,8 +539,8 @@ class Gui(wx.Frame):
             self.reset_button.Disable()
             self.cycles_spin.Disable()
             
-            # Start the simulation timer (run every 100ms)
-            self.simulation_timer.Start(100)
+            # Start the simulation timer with current speed setting
+            self.simulation_timer.Start(self.speed_settings[self.current_speed])
             self.SetStatusText(f"Running simulation for {num_cycles} cycles...")
             
     def stop_simulation(self):
@@ -685,9 +711,20 @@ class Gui(wx.Frame):
         dialog.Destroy()
         
     def on_remove_monitor(self, event):
-        """Handle removing a selected monitor."""
-        selection = self.monitor_list.GetFirstSelected()
-        if selection != -1:
+        """Handle removing multiple selected monitors."""
+        # Get all selected monitors
+        selected = []
+        item = self.monitor_list.GetFirstSelected()
+        while item != -1:
+            selected.append(item)
+            item = self.monitor_list.GetNextSelected(item)
+            
+        if not selected:
+            wx.MessageBox("Please select monitors to zap", "Error",
+                         wx.OK | wx.ICON_ERROR)
+            return
+            
+        for selection in selected:
             signal_name = self.monitor_list.GetItem(selection, 0).GetText()
             
             # Find the device and output IDs for this signal
@@ -695,15 +732,14 @@ class Gui(wx.Frame):
                 if signal_name == self.devices.get_signal_name(device_id, output_id):
                     # Remove the monitor
                     if self.monitors.remove_monitor(device_id, output_id):
-                        self.update_display()
                         self.SetStatusText(f"Zapped monitor for {signal_name}")
                     else:
-                        wx.MessageBox("Failed to zap monitor", "Error",
+                        wx.MessageBox(f"Failed to zap monitor {signal_name}", "Error",
                                     wx.OK | wx.ICON_ERROR)
                     break
-        else:
-            wx.MessageBox("Please select a monitor to zap", "Error",
-                         wx.OK | wx.ICON_ERROR)
+                    
+        # Update display after all monitors are removed
+        self.update_display()
 
     def update_switch_list(self):
         """Update the list of switches and their states."""
@@ -726,13 +762,22 @@ class Gui(wx.Frame):
             
     def on_switch_selected(self, event):
         """Handle switch selection event."""
-        # Enable toggle button when a switch is selected
-        self.toggle_switch_btn.Enable()
+        # Enable toggle button when any switches are selected
+        self.toggle_switch_btn.Enable(self.switch_list.GetSelectedItemCount() > 0)
         
     def on_toggle_switch(self, event):
-        """Handle toggling a switch state."""
-        selection = self.switch_list.GetFirstSelected()
-        if selection != -1:
+        """Handle toggling multiple switch states."""
+        # Get all selected switches
+        selected = []
+        item = self.switch_list.GetFirstSelected()
+        while item != -1:
+            selected.append(item)
+            item = self.switch_list.GetNextSelected(item)
+            
+        if not selected:
+            return
+            
+        for selection in selected:
             switch_name = self.switch_list.GetItem(selection, 0).GetText()
             current_state = self.switch_list.GetItem(selection, 1).GetText()
             
@@ -743,15 +788,30 @@ class Gui(wx.Frame):
             new_state = self.devices.LOW if current_state == "HIGH" else self.devices.HIGH
             
             if self.devices.set_switch(device_id, new_state):
-                self.update_switch_list()
                 self.SetStatusText(f"Toggled {switch_name} to {new_state}")
-                
-                # Execute network to propagate changes
-                if self.network.execute_network():
-                    self.update_display()
-                else:
-                    wx.MessageBox("Error: Network oscillating", "Error",
-                                wx.OK | wx.ICON_ERROR)
             else:
-                wx.MessageBox("Failed to toggle switch", "Error",
+                wx.MessageBox(f"Failed to toggle switch {switch_name}", "Error",
                             wx.OK | wx.ICON_ERROR)
+                
+        # Update display after all switches are toggled
+        self.update_switch_list()
+        
+        # Execute network to propagate changes
+        if self.network.execute_network():
+            self.update_display()
+        else:
+            wx.MessageBox("Error: Network oscillating", "Error",
+                        wx.OK | wx.ICON_ERROR)
+
+    def on_speed_button(self, event):
+        """Handle the speed button click to cycle through simulation speeds."""
+        speeds = list(self.speed_settings.keys())
+        current_index = speeds.index(self.current_speed)
+        next_index = (current_index + 1) % len(speeds)
+        self.current_speed = speeds[next_index]
+        self.speed_btn.SetLabel(self.current_speed)
+        
+        # Update timer if simulation is running
+        if self.is_running:
+            self.simulation_timer.Stop()
+            self.simulation_timer.Start(self.speed_settings[self.current_speed])
