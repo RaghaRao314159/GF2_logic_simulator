@@ -417,7 +417,7 @@ class Parser:
             self.symbol = self.scanner.get_symbol()
 
             if self.symbol.type == self.scanner.DOT:
-
+                
                 # Found a dot, get the port number
                 self.symbol = self.scanner.get_symbol()
 
@@ -425,7 +425,6 @@ class Parser:
                 port_id = self.symbol.id
 
                 error = self.monitors.make_monitor(device_id, port_id)
-
                 self.symbol = self.scanner.get_symbol()
                 if error == self.network.DEVICE_ABSENT:
                     error = self.DEVICE_ABSENT
@@ -454,6 +453,7 @@ class Parser:
     def monitor_list(self):
         # Parse the first signal to be monitored
         error = self.monitor()
+        # print ('I am here',self.monitor.monitors_dictionary)
         # Check for errors in the first monitored signal
         if error !=  self.NO_ERROR:
             self.error(error)
@@ -482,7 +482,6 @@ class Parser:
             
             if self.parent == None:
                 return
-
         return
 
     def error(self, error_type):
@@ -571,7 +570,7 @@ class Parser:
                 self.parent = None
                 if not stopping_punctuation_flag:
                     self.error_count += 1
-                    print("Expected a semicolon prior to this:") # tested
+                    print("Expected a semicolon prior to this") # tested
                     print(f"LINE {self.symbol.line_number}:")
                     print(self.scanner.print_error(self.symbol))
                     print()

@@ -13,7 +13,7 @@
 
         /* connect inputs and outputs */
         CONNECT S1 > X1.I1,
-                X1.I1 > A1.I1,
+                X1 > A1.I1,
                 S2 > X1.I2,
                 S2 > A1.I2,
                 S3 > X2.I2,
@@ -33,4 +33,4 @@
                 O1, # this is the carry bit
                 NO1 ;
 
-        END 
+        ED 
