@@ -342,51 +342,13 @@ class Gui(wx.Frame):
         
         # File Menu
         fileMenu = wx.Menu()
-        fileMenu.Append(wx.ID_NEW, "&New\tCtrl+N")
-        fileMenu.Append(wx.ID_OPEN, "&Open\tCtrl+O")
-        fileMenu.Append(wx.ID_SAVE, "&Save\tCtrl+S")
+        fileMenu.Append(wx.ID_ABOUT, "&About")
+        fileMenu.Append(wx.ID_HELP, "&Help\tF1")
         fileMenu.AppendSeparator()
         fileMenu.Append(wx.ID_EXIT, "E&xit\tAlt+F4")
         menuBar.Append(fileMenu, "&File")
         
-        # Simulation Menu
-        simMenu = wx.Menu()
-        simMenu.Append(wx.ID_ANY, "&Run Simulation\tF5")
-        simMenu.Append(wx.ID_ANY, "&Stop Simulation\tF6")
-        simMenu.Append(wx.ID_ANY, "&Reset\tF7")
-        menuBar.Append(simMenu, "&Simulation")
-        
-        # Help Menu
-        helpMenu = wx.Menu()
-        helpMenu.Append(wx.ID_ABOUT, "&About")
-        helpMenu.Append(wx.ID_HELP, "&Help\tF1")
-        menuBar.Append(helpMenu, "&Help")
-        
         self.SetMenuBar(menuBar)
-
-        # Create the main toolbar with standard art provider bitmaps
-        self.toolbar = wx.ToolBar(self)
-        self.toolbar.SetToolBitmapSize((24, 24))
-        
-        # Add toolbar buttons with standard art bitmaps
-        run_tool = self.toolbar.AddTool(
-            wx.ID_ANY, "Run",
-            wx.ArtProvider.GetBitmap(wx.ART_GO_FORWARD, wx.ART_TOOLBAR, (24, 24)),
-            "Run Simulation"
-        )
-        stop_tool = self.toolbar.AddTool(
-            wx.ID_ANY, "Stop",
-            wx.ArtProvider.GetBitmap(wx.ART_ERROR, wx.ART_TOOLBAR, (24, 24)),
-            "Stop Simulation"
-        )
-        reset_tool = self.toolbar.AddTool(
-            wx.ID_ANY, "Reset",
-            wx.ArtProvider.GetBitmap(wx.ART_UNDO, wx.ART_TOOLBAR, (24, 24)),
-            "Reset Simulation"
-        )
-        
-        self.toolbar.Realize()
-        self.SetToolBar(self.toolbar)
 
         # Create status bar
         self.CreateStatusBar()
@@ -415,6 +377,30 @@ class Gui(wx.Frame):
         self.stop_button = wx.Button(control_panel, label="Stop")
         self.reset_button = wx.Button(control_panel, label="Reset")
         
+        # Add simulation controls
+        sim_sizer.Add(cycles_label, 0, wx.ALL, 5)
+        sim_sizer.Add(self.cycles_spin, 0, wx.EXPAND | wx.ALL, 5)
+        sim_sizer.Add(self.run_button, 0, wx.EXPAND | wx.ALL, 5)
+        sim_sizer.Add(self.stop_button, 0, wx.EXPAND | wx.ALL, 5)
+        sim_sizer.Add(self.reset_button, 0, wx.EXPAND | wx.ALL, 5)
+
+        # Add switch controls section
+        switch_box = wx.StaticBox(control_panel, label="Switch Controls")
+        switch_sizer = wx.StaticBoxSizer(switch_box, wx.VERTICAL)
+        
+        # Create a list control for switches
+        self.switch_list = wx.ListCtrl(control_panel, style=wx.LC_REPORT)
+        self.switch_list.InsertColumn(0, "Switch")
+        self.switch_list.InsertColumn(1, "State")
+        
+        # Add toggle button
+        self.toggle_switch_btn = wx.Button(control_panel, label="Toggle Switch")
+        self.toggle_switch_btn.Disable()  # Initially disabled until a switch is selected
+        
+        # Add components to switch sizer
+        switch_sizer.Add(self.switch_list, 1, wx.EXPAND | wx.ALL, 5)
+        switch_sizer.Add(self.toggle_switch_btn, 0, wx.EXPAND | wx.ALL, 5)
+
         # Monitor controls
         monitor_box = wx.StaticBox(control_panel, label="Monitors")
         monitor_sizer = wx.StaticBoxSizer(monitor_box, wx.VERTICAL)
@@ -428,18 +414,6 @@ class Gui(wx.Frame):
         monitor_btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.add_monitor_btn = wx.Button(control_panel, label="Add Monitor")
         self.remove_monitor_btn = wx.Button(control_panel, label="Remove Monitor")
-        
-        # Layout
-        main_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        
-        # Add simulation controls
-        sim_sizer.Add(cycles_label, 0, wx.ALL, 5)
-        sim_sizer.Add(self.cycles_spin, 0, wx.EXPAND | wx.ALL, 5)
-        sim_sizer.Add(self.run_button, 0, wx.EXPAND | wx.ALL, 5)
-        sim_sizer.Add(self.stop_button, 0, wx.EXPAND | wx.ALL, 5)
-        sim_sizer.Add(self.reset_button, 0, wx.EXPAND | wx.ALL, 5)
-        
-        # Add monitor controls
         monitor_btn_sizer.Add(self.add_monitor_btn, 1, wx.RIGHT, 5)
         monitor_btn_sizer.Add(self.remove_monitor_btn, 1)
         monitor_sizer.Add(self.monitor_list, 1, wx.EXPAND | wx.ALL, 5)
@@ -448,10 +422,12 @@ class Gui(wx.Frame):
         # Build the control panel
         control_sizer = wx.BoxSizer(wx.VERTICAL)
         control_sizer.Add(sim_sizer, 0, wx.EXPAND | wx.ALL, 5)
+        control_sizer.Add(switch_sizer, 0, wx.EXPAND | wx.ALL, 5)
         control_sizer.Add(monitor_sizer, 1, wx.EXPAND | wx.ALL, 5)
         control_panel.SetSizer(control_sizer)
         
         # Build the main layout
+        main_sizer = wx.BoxSizer(wx.HORIZONTAL)
         main_sizer.Add(self.canvas, 1, wx.EXPAND | wx.ALL, 5)
         main_sizer.Add(control_panel, 0, wx.EXPAND | wx.ALL, 5)
         
@@ -469,6 +445,11 @@ class Gui(wx.Frame):
         self.reset_button.Bind(wx.EVT_BUTTON, self.on_reset_button)
         self.add_monitor_btn.Bind(wx.EVT_BUTTON, self.on_add_monitor)
         self.remove_monitor_btn.Bind(wx.EVT_BUTTON, self.on_remove_monitor)
+        self.toggle_switch_btn.Bind(wx.EVT_BUTTON, self.on_toggle_switch)
+        self.switch_list.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_switch_selected)
+        
+        # Initialize lists
+        self.update_switch_list()
         
         # Set minimum window size
         self.SetMinSize((800, 600))
@@ -721,3 +702,54 @@ class Gui(wx.Frame):
         else:
             wx.MessageBox("Please select a monitor to remove", "Error",
                          wx.OK | wx.ICON_ERROR)
+
+    def update_switch_list(self):
+        """Update the list of switches and their states."""
+        self.switch_list.DeleteAllItems()
+        
+        # Find all switch devices
+        switch_ids = self.devices.find_devices(self.devices.SWITCH)
+        
+        for i, switch_id in enumerate(switch_ids):
+            # Get switch name
+            switch_name = self.devices.get_signal_name(switch_id, None)
+            
+            # Get switch state
+            device = self.devices.get_device(switch_id)
+            state = "HIGH" if device.switch_state == self.devices.HIGH else "LOW"
+            
+            # Add to list
+            index = self.switch_list.InsertItem(i, switch_name)
+            self.switch_list.SetItem(index, 1, state)
+            
+    def on_switch_selected(self, event):
+        """Handle switch selection event."""
+        # Enable toggle button when a switch is selected
+        self.toggle_switch_btn.Enable()
+        
+    def on_toggle_switch(self, event):
+        """Handle toggling a switch state."""
+        selection = self.switch_list.GetFirstSelected()
+        if selection != -1:
+            switch_name = self.switch_list.GetItem(selection, 0).GetText()
+            current_state = self.switch_list.GetItem(selection, 1).GetText()
+            
+            # Get device ID
+            [device_id, _] = self.devices.get_signal_ids(switch_name)
+            
+            # Toggle state
+            new_state = self.devices.LOW if current_state == "HIGH" else self.devices.HIGH
+            
+            if self.devices.set_switch(device_id, new_state):
+                self.update_switch_list()
+                self.SetStatusText(f"Toggled {switch_name} to {new_state}")
+                
+                # Execute network to propagate changes
+                if self.network.execute_network():
+                    self.update_display()
+                else:
+                    wx.MessageBox("Error: Network oscillating", "Error",
+                                wx.OK | wx.ICON_ERROR)
+            else:
+                wx.MessageBox("Failed to toggle switch", "Error",
+                            wx.OK | wx.ICON_ERROR)
