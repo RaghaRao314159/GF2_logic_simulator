@@ -1,0 +1,35 @@
+/*
+    Name the gates, switches and clocks. 
+    Number of inputs and outputs
+    does not need to be defined for DTYPE 
+*/ 
+
+DEVICES D1:DTYPE, 
+        D2:DTYPE, 
+        N1:NAND 2,
+        C1:CLOCK 8, # This denotes half-period of cycle
+        S1:SWITCH 0, 
+        S2:SWITCH 1,
+        S3:SWITCH 0 ;
+
+/* connect inputs and outputs */
+CONNECT S1 > D1.SET,
+        S1 > D2.SET,
+        S2 > D1.DATA,
+        S3 > D1.CLEAR,
+        S3 > D2.CLEAR,
+
+        C1 > D1.CLK,
+        C1 > D2.CLK,
+
+        D1.Q > D2.DATA,
+        D2.Q > N1.I1,
+        D2.Q > D1.Q, # Output cannot be connected to another output
+        D2.Q > D1.PLATYPUS, # Port Absent, Invalid port for D-type device
+        D2.QBAR > N1.I2 ;
+
+/* monitor certain signals */
+MONITOR D1.QBAR, 
+        N1 ;
+
+END 

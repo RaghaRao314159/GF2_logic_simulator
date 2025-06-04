@@ -49,14 +49,15 @@ class Parser:
         # errors
         self.error_count = 0
         self.error_type_list = [
-            self.NO_COMMA, self.NO_SEMICOLON, self.NO_COLON, self.NO_ARROW, self.NO_DOT,
-            self.NO_KEYWORD, self.NO_DEVICE_TYPE, self.NO_NUMBER, self.INVALID_NAME,
+            self.NO_SEMICOLON, self.NO_COLON, self.NO_ARROW, self.NO_DOT, self.DOT,
+            self.NO_DEVICE_TYPE, self.NO_NUMBER, self.INVALID_NAME,
             self.CLOCK_PERIOD_ZERO, self.NO_INITIALISATION_KEYWORD, self.NOT_BIT,
-            self.NO_ERROR, self.QUALIFIER_PRESENT, self.INVALID_RANGE, self.NO_DOT, self.DOT,
-            self.INVALID_CONNECTION_SC, self.DEVICE_ABSENT, self.INPUT_CONNECTED,
-            self.INPUT_TO_INPUT, self.PORT_ABSENT, self.OUTPUT_TO_OUTPUT, self.NOT_CONNECTED,
-            self.INVALID_PORT, self.INVALID_PORT_DTYPE, self.INVALID_PORT_XOR, self.NOT_I_PORT,
-            self.PORT_OUT_RANGE, self.NOT_END, self.REPEATED_MONITOR] = range(31)
+            self.NO_ERROR, self.QUALIFIER_PRESENT, self.INVALID_RANGE, self.INVALID_CONNECTION_SC, 
+            self.DEVICE_ABSENT, self.INPUT_CONNECTED, self.INPUT_TO_INPUT, self.PORT_ABSENT, 
+            self.OUTPUT_TO_OUTPUT, self.NOT_CONNECTED,
+            self.INVALID_PORT, self.INVALID_PORT_DTYPE, 
+            self.INVALID_PORT_XOR, self.NOT_I_PORT,
+            self.PORT_OUT_RANGE, self.NOT_END, self.REPEATED_MONITOR] = range(28)
         
         self.dot_signals = {"IN": [self.devices.D_TYPE],
                             "OUT": [self.devices.D_TYPE, self.devices.XOR, self.devices.AND, self.devices.NAND, self.devices.OR, self.devices.NOR] }
@@ -142,6 +143,7 @@ class Parser:
             error = self.NO_ERROR
         elif error == self.devices.INVALID_QUALIFIER:
             error = self.INVALID_RANGE
+            return error
 
         if device_type_id == self.scanner.CLOCK_ID:
             error = self.devices.make_device(device_id, self.devices.CLOCK, device_property=self.symbol.id)
@@ -196,6 +198,13 @@ class Parser:
         # Parse the first device
         error = self.device()
         # print('after first device', self.scanner.current_character)
+        if error != self.NO_ERROR:
+            # print("parent value", self.parent)
+            self.error(error)
+
+        if self.parent == None:
+            return
+
         while True:
             if self.symbol.type == self.scanner.COMMA:
                 self.symbol = self.scanner.get_symbol()
@@ -238,7 +247,10 @@ class Parser:
 
             if device_type_id not in self.dot_signals["IN"]:
                 if self.symbol.type == self.scanner.DOT:
-                    return self.DOT
+                    if device_type_id in [self.devices.SWITCH, self.devices.CLOCK]:
+                        return self.DOT
+                    else:
+                        return self.INPUT_TO_INPUT
                 
                 return [device_id, None]
 
@@ -293,8 +305,10 @@ class Parser:
 
                 if port_id not in self.devices.get_device(device_id).inputs.keys():
                     if device_type_id == self.devices.D_TYPE:
-                            # print("Invalid port number for D-type device")        
-                            return self.INVALID_PORT_DTYPE      
+                            # print("Invalid port number for D-type device")
+                        if port_id in [self.scanner.Q_ID, self.scanner.QBAR_ID]:
+                            return self.OUTPUT_TO_OUTPUT      
+                        return self.INVALID_PORT_DTYPE      
 
                     elif device_type_id == self.devices.XOR:
                             # print("Invalid port number for XOR device")        
@@ -314,7 +328,7 @@ class Parser:
             else:
                 # Error: expected a dot after the device name
                 # print("Expected a dot after the device name")
-                return self.NO_DOT
+                return self.OUTPUT_TO_OUTPUT
 
         else:
             # Error: invalid device name
@@ -456,6 +470,13 @@ class Parser:
         # Parse the first device
         error = self.monitor()
         # print('after first device', self.scanner.current_character)
+        # Parse the first device
+        if error !=  self.NO_ERROR:
+            # print("connection has error")
+            self.error(error)
+
+        if self.parent == None:
+            return
         while True:
             if self.symbol.type == self.scanner.COMMA:
                 self.symbol = self.scanner.get_symbol()
@@ -486,29 +507,25 @@ class Parser:
         """Handle errors in the definition file."""
         self.error_count += 1
         stopping_punctuation_flag = False
-        if error_type == self.NO_COMMA:
-            print("Expected a comma")
-        elif error_type == self.NO_SEMICOLON:
+        if error_type == self.NO_SEMICOLON:
             print("Expected a comma or semicolon") # tested
             stopping_punctuation_flag = True
         elif error_type == self.NO_COLON:
-            print("Expected a colon")
+            print("Expected a colon") 
         elif error_type == self.NO_ARROW:
             print("Expected an arrow")
         elif error_type == self.NO_DOT:
             print("Expected a dot")
         elif error_type == self.DOT:
             print("Did not expect a dot")
-        elif error_type == self.NO_KEYWORD:
-            print("Expected a keyword")
         elif error_type == self.NO_DEVICE_TYPE:
             print("Expected a device type") # tested
         elif error_type == self.NO_NUMBER:
             print("Expected a number") # tested
         elif error_type == self.INVALID_NAME:
-            print("Invalid device name (main)")
-        elif error_type == self.NO_INITIALISATION_KEYWORD:
-            print("Expected DEVICES, CONNECT, MONITOR or END")
+            print("Invalid device name")
+        elif error_type == self.NO_INITIALISATION_KEYWORD: 
+            print("Expected DEVICES, CONNECT, MONITOR or END") # tested
         elif error_type == self.NOT_BIT:
             print("Expected a bit (0 or 1)") # tested
         elif error_type == self.QUALIFIER_PRESENT:
@@ -516,11 +533,11 @@ class Parser:
         elif error_type == self.INVALID_RANGE:
             print("Expected number between 1 and 16 inclusive")
         elif error_type == self.INVALID_CONNECTION_SC:
-            print("Should not to SWITCH or CLOCK")
+            print("Connection should not be made to SWITCH or CLOCK")
         elif error_type == self.DEVICE_ABSENT:
             print("Device not found") # tested
         elif error_type == self.INPUT_CONNECTED:
-            print("Input already connected")
+            print("Input has already been connected")
         elif error_type == self.INPUT_TO_INPUT:
             print("Input cannot be connected to another input")
         elif error_type == self.PORT_ABSENT:
@@ -528,15 +545,15 @@ class Parser:
         elif error_type == self.OUTPUT_TO_OUTPUT:
             print("Output cannot be connected to another output")
         elif error_type == self.NOT_I_PORT:
-            print("Port is not an input port")
+            print("Port Absent, Port is not a valid gate input port")
         elif error_type == self.PORT_OUT_RANGE:
             print("Port number out of range")
         elif error_type == self.INVALID_PORT:
             print("Invalid port number")
         elif error_type == self.INVALID_PORT_DTYPE:
-            print("Invalid port number for D-type device")
+            print("Port Absent, Invalid port for D-type device")
         elif error_type == self.INVALID_PORT_XOR:
-            print("Invalid port number for XOR device")
+            print("Port Absent, Invalid port number for XOR device")
         elif error_type == self.NOT_END:
             print("Expected 'END' keyword")
         elif error_type == self.REPEATED_MONITOR:

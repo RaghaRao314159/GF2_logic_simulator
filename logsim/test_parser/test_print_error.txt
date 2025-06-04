@@ -4,7 +4,7 @@
     does not need to be defined for DTYPE
 */
 
-? # double errror, invalid character and no semicolon
+? # double error, invalid character and no semicolon
 
 DEVICES D1:DTYPE,
         D2:DTYPE 3, # error as DTYPE should not be an error
