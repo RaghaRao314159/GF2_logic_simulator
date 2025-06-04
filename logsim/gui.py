@@ -42,7 +42,7 @@ class MyGLCanvas(wxcanvas.GLCanvas):
         self.init = False
         self.context = wxcanvas.GLContext(self)
 
-        # Store instances
+        # Store devices and monitors
         self.devices = devices
         self.monitors = monitors
 
@@ -67,7 +67,7 @@ class MyGLCanvas(wxcanvas.GLCanvas):
         ]
         
         # Signal line properties
-        self.signal_line_width = 2.0  # Thicker signal lines
+        self.signal_line_width = 4.0  # Thicker signal lines
         self.grid_line_width = 1.0  # Standard grid lines
         
         # Initialize empty signal data
@@ -97,6 +97,7 @@ class MyGLCanvas(wxcanvas.GLCanvas):
         """Handle all drawing operations."""
         self.SetCurrent(self.context)
         if not self.init:
+            # Configure the viewport, modelview and projection matrices
             self.init_gl()
             self.init = True
 
@@ -134,8 +135,8 @@ class MyGLCanvas(wxcanvas.GLCanvas):
         GL.glLineWidth(self.grid_line_width)
         GL.glBegin(GL.GL_LINES)
         
-        # Calculate grid dimensions based on content
-        max_time_units = max(50, len(next(iter(self.signal_data.values()), [])))
+        # Calculate the maximum number of time units to display - either 50 or the length of the longest signal trace
+        max_time_units = max(50, max((len(signal_list) for signal_list in self.signal_data.values()), default=0))
         num_signals = len(self.signal_data)
         total_height = max((num_signals + 1) * self.signal_height, size.height)
         total_width = max(max_time_units * self.time_unit_width, size.width)
@@ -155,7 +156,7 @@ class MyGLCanvas(wxcanvas.GLCanvas):
     def draw_time_axis(self):
         """Draw the time axis with numbers."""
         size = self.GetClientSize()
-        max_time_units = max(50, len(next(iter(self.signal_data.values()), [])))
+        max_time_units = max(50, max((len(signal_list) for signal_list in self.signal_data.values()), default=0))
         
         for i in range(max_time_units):
             x = i * self.time_unit_width
@@ -183,12 +184,12 @@ class MyGLCanvas(wxcanvas.GLCanvas):
             
             for t, value in enumerate(values):
                 x = t * self.time_unit_width
-                y = y_base + (self.signal_height * 0.7 if value else self.signal_height * 0.3)
+                y = y_base + (self.signal_height * 0.8 if value else self.signal_height * 0.2)
                 
                 # Draw vertical line if value changed
                 if value != last_value:
-                    GL.glVertex2f(x, y_base + (self.signal_height * 0.3))
-                    GL.glVertex2f(x, y_base + (self.signal_height * 0.7))
+                    GL.glVertex2f(x, y_base + (self.signal_height * 0.2))
+                    GL.glVertex2f(x, y_base + (self.signal_height * 0.8))
                 
                 GL.glVertex2f(x, y)
                 GL.glVertex2f(x + self.time_unit_width, y)
@@ -359,6 +360,7 @@ class Gui(wx.Frame):
         
         # Configure the widgets with better styling
         control_panel = wx.Panel(main_panel, style=wx.BORDER_THEME)
+        # Colour of the control panel set to light grey
         control_panel.SetBackgroundColour(wx.Colour(240, 240, 240))
         
         # Canvas for drawing signals
@@ -413,7 +415,7 @@ class Gui(wx.Frame):
         # Add/Remove monitor buttons
         monitor_btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.add_monitor_btn = wx.Button(control_panel, label="Add Monitor")
-        self.remove_monitor_btn = wx.Button(control_panel, label="Remove Monitor")
+        self.remove_monitor_btn = wx.Button(control_panel, label="Zap Monitor")
         monitor_btn_sizer.Add(self.add_monitor_btn, 1, wx.RIGHT, 5)
         monitor_btn_sizer.Add(self.remove_monitor_btn, 1)
         monitor_sizer.Add(self.monitor_list, 1, wx.EXPAND | wx.ALL, 5)
@@ -471,7 +473,7 @@ class Gui(wx.Frame):
         if Id == wx.ID_EXIT:
             self.Close(True)
         if Id == wx.ID_ABOUT:
-            wx.MessageBox("Logic Simulator\nCreated by Mojisola Agboola\n2017",
+            wx.MessageBox("Logic Simulator\nCreated by:\nAyoife Dada\nNarmeephan Arunthavarajah\nRaghavendra Narayan Rao\n2025",
                           "About Logsim", wx.ICON_INFORMATION | wx.OK)
 
     def on_spin(self, event):
@@ -694,13 +696,13 @@ class Gui(wx.Frame):
                     # Remove the monitor
                     if self.monitors.remove_monitor(device_id, output_id):
                         self.update_display()
-                        self.SetStatusText(f"Removed monitor for {signal_name}")
+                        self.SetStatusText(f"Zapped monitor for {signal_name}")
                     else:
-                        wx.MessageBox("Failed to remove monitor", "Error",
+                        wx.MessageBox("Failed to zap monitor", "Error",
                                     wx.OK | wx.ICON_ERROR)
                     break
         else:
-            wx.MessageBox("Please select a monitor to remove", "Error",
+            wx.MessageBox("Please select a monitor to zap", "Error",
                          wx.OK | wx.ICON_ERROR)
 
     def update_switch_list(self):
