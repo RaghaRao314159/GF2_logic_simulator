@@ -64,7 +64,6 @@ class Parser:
 
     def parse_network(self):
         """Parse the circuit definition file."""
-        # TODO
         # For now just return True, so that userint and gui can run in the
         # skeleton code. When complete, should return False when there are
         # errors in the circuit definition file.
@@ -73,9 +72,7 @@ class Parser:
             if (self.symbol.id == self.scanner.DEVICES_ID):
                 self.parent = 'D'
                 # Keyword 'connect' found, start parsing connections
-                # print("before next symbol", self.scanner.DEVICES_ID)
                 self.symbol = self.scanner.get_symbol()
-                # print("before entering", self.symbol.id, self.names.get_name_string(self.symbol.id))
                 self.device_list()
 
             elif self.symbol.id == self.scanner.CONNECT_ID:
@@ -111,6 +108,7 @@ class Parser:
         return
 
     def make_device_parser(self, device_id, device_type_id):
+        """Make a device with its parameter."""
         self.symbol = self.scanner.get_symbol()
         error = None
 
@@ -118,8 +116,6 @@ class Parser:
             error = self.devices.make_device(device_id, self.devices.XOR, device_property=self.symbol.id)
         elif device_type_id == self.scanner.DTYPE_ID:
             error = self.devices.make_device(device_id, self.devices.D_TYPE, device_property=self.symbol.id)
-
-        # print("Current Charcter", self.scanner.current_character)
 
         if error == self.devices.QUALIFIER_PRESENT:
             error = self.QUALIFIER_PRESENT
@@ -166,18 +162,17 @@ class Parser:
         return error
 
     def device(self):
+        """Parse a device with its device type."""
         if self.symbol.type == self.scanner.NAME:
             # Valid device name, get the next symbol
             device_id = self.symbol.id
             self.symbol = self.scanner.get_symbol()
 
             if self.symbol.type == self.scanner.COLON:
-                # print('spotted colon correctly')
                 self.symbol = self.scanner.get_symbol()
 
                 if (self.symbol.type == self.scanner.KEYWORD and
                         self.symbol.id in self.scanner.device_id_list):
-                    # print('spotted keyword correctly')
                     device_type_id = self.symbol.id
                     return self.make_device_parser(device_id, device_type_id)
 
@@ -191,31 +186,31 @@ class Parser:
             return self.INVALID_NAME
 
     def device_list(self):
-        # print('before first device', self.scanner.current_character)
         # Parse the first device
         error = self.device()
-        # print('after first device', self.scanner.current_character)
+        # Check for errors in the first device
         if error != self.NO_ERROR:
-            # print("parent value", self.parent)
             self.error(error)
 
+        # Check if there are more devices to be parsed
         if self.parent == None:
             return
 
+        # Check for more devices
         while True:
             if self.symbol.type == self.scanner.COMMA:
                 self.symbol = self.scanner.get_symbol()
                 error = self.device()
-                # print("prior parent value", self.parent)
+                # Check for errors in the subsequent devices
                 if error != self.NO_ERROR:
-                    # print("parent value", self.parent)
                     self.error(error)
 
+                # Check if there are more devices to be parsed
                 if self.parent == None:
                     return
 
             elif self.symbol.type == self.scanner.SEMICOLON:
-                # End of connection list
+                # End of device list
                 self.symbol = self.scanner.get_symbol()
                 break
 
@@ -230,7 +225,6 @@ class Parser:
 
     def in_signame(self):
         """Parse a signal name and return the device and port IDs."""
-        # TODO: What happens when the output is defined with no dot?
 
         if self.symbol.type == self.scanner.NAME:
             # Valid device name, get the next symbol
@@ -277,7 +271,6 @@ class Parser:
     
     def out_signame(self):
         """Parse a signal name and return the device and port IDs."""
-        # TODO: What happens when the output is defined with no dot?
 
         if self.symbol.type == self.scanner.NAME:
             # Valid device name, get the next symbol
@@ -339,7 +332,6 @@ class Parser:
         in_signal = self.in_signame()
         if type(in_signal) == int:
             # error has occured
-            # print("error in in_signal")
             return in_signal
         else:
             [in_device_id, in_port_id] = in_signal
@@ -358,7 +350,6 @@ class Parser:
         out_signal = self.out_signame()
         if type(out_signal) == int:
             # error has occured
-            # print("error in out_signal")
             return out_signal
         else:
             [out_device_id, out_port_id] = out_signal
@@ -385,24 +376,24 @@ class Parser:
 
     def connection_list(self):
         """Parse a list of connections."""
-        # Parse the first device
+        # Parse the first connection
         error = self.connection()
         if error !=  self.NO_ERROR:
-            # print("connection has error")
+            # Check for errors in the first connection
             self.error(error)
 
         if self.parent == None:
             return
 
-        # print("Current symbol type", self.symbol.type)
-
+        # Check for more connections
         while self.symbol.type == self.scanner.COMMA:
             self.symbol = self.scanner.get_symbol()
             error = self.connection()
+            # Check for errors in the subsequent connections
             if error !=  self.NO_ERROR:
-                # print("connection has error")
                 self.error(error)
 
+            # Check if there are more connections to be made
             if self.parent == None:
                 return
 
@@ -418,8 +409,7 @@ class Parser:
 
 
     def monitor(self):
-        """Parse a signal name and return the device and port IDs."""
-        # TODO: What happens when the output is defined with no dot?
+        """Parse a signal name and monitor it."""
         if self.symbol.type == self.scanner.NAME:
             # Valid device name, get the next symbol
             device_id = self.symbol.id
@@ -462,14 +452,10 @@ class Parser:
             return self.INVALID_NAME
 
     def monitor_list(self):
-        # print('before first device', self.scanner.current_character)
-        # print('before first device', self.scanner.current_character)
-        # Parse the first device
+        # Parse the first signal to be monitored
         error = self.monitor()
-        # print('after first device', self.scanner.current_character)
-        # Parse the first device
+        # Check for errors in the first monitored signal
         if error !=  self.NO_ERROR:
-            # print("connection has error")
             self.error(error)
 
         if self.parent == None:
@@ -478,16 +464,15 @@ class Parser:
             if self.symbol.type == self.scanner.COMMA:
                 self.symbol = self.scanner.get_symbol()
                 error = self.monitor()
-                # print("prior parent value", self.parent)
+                # Check for errors in the monitored signal
                 if error != self.NO_ERROR:
-                    # print("parent value", self.parent)
                     self.error(error)
-
+                # Check if there are more signals to be monitored
                 if self.parent == None:
                     return
 
             elif self.symbol.type == self.scanner.SEMICOLON:
-                # End of connection list
+                # End of monitor list  
                 self.symbol = self.scanner.get_symbol()
                 break
 
