@@ -46,6 +46,10 @@ class MyNames:
 
         If the name ID is not a valid index into the names list, return None.
         """
+        if type(name_id) is not int:
+            raise TypeError("name_id must be an integer")
+        if name_id < 0:
+            raise ValueError("name_id must be non-negative")
         if self.id_names.get(name_id, -1) == -1:
             return None
         return self.id_names[name_id]
