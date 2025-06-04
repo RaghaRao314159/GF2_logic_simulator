@@ -70,7 +70,7 @@ class Parser:
         # errors in the circuit definition file.
         self.symbol = self.scanner.get_symbol()
         while self.symbol.type != self.scanner.EOF:
-            if (self.symbol.id == self.scanner.DEVICES_ID) or (self.parent == 'D'):
+            if (self.symbol.id == self.scanner.DEVICES_ID):
                 self.parent = 'D'
                 # Keyword 'connect' found, start parsing connections
                 # print("before next symbol", self.scanner.DEVICES_ID)
@@ -143,7 +143,6 @@ class Parser:
             error = self.NO_ERROR
         elif error == self.devices.INVALID_QUALIFIER:
             error = self.INVALID_RANGE
-            return error
 
         if device_type_id == self.scanner.CLOCK_ID:
             error = self.devices.make_device(device_id, self.devices.CLOCK, device_property=self.symbol.id)
@@ -153,12 +152,10 @@ class Parser:
                 error = self.NO_ERROR
             elif error == self.devices.INVALID_QUALIFIER:
                 error = self.CLOCK_PERIOD_ZERO
-                return error
         elif device_type_id == self.scanner.SWITCH_ID:
             error = self.devices.make_device(device_id, self.devices.SWITCH, device_property=self.symbol.id)
             if error in [self.devices.NO_QUALIFIER, self.devices.INVALID_QUALIFIER]:
                 error = self.NOT_BIT
-                return error
             elif error == self.devices.NO_ERROR:
                 error = self.NO_ERROR
 
@@ -564,7 +561,16 @@ class Parser:
         print(f"LINE {self.symbol.line_number}:")
         print(self.scanner.print_error(self.symbol))
         print()
+
+
+
+
+
+
         
+        if self.symbol.type == self.scanner.COMMA:
+            return
+
         if self.symbol.type == self.scanner.SEMICOLON:
             self.symbol = self.scanner.get_symbol()
             self.parent = None
