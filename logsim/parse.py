@@ -261,6 +261,10 @@ class Parser:
             else:
                 # Error: expected a dot after the device name
                 return self.NO_DOT
+        elif self.symbol.id in [
+                self.scanner.DEVICES_ID, self.scanner.CONNECT_ID,
+                self.scanner.MONITOR_ID, self.scanner.END_ID]:
+            return self.MISSED_SEMICOLON
         else:
             # Error: invalid device name
             return self.INVALID_NAME
@@ -409,6 +413,10 @@ class Parser:
                 elif error == self.monitors.NO_ERROR:
                     error = self.NO_ERROR
                 return error
+        elif self.symbol.id in [
+                self.scanner.DEVICES_ID, self.scanner.CONNECT_ID,
+                self.scanner.MONITOR_ID, self.scanner.END_ID]:
+            return self.MISSED_SEMICOLON
         else:
             return self.INVALID_NAME
 
@@ -438,13 +446,14 @@ class Parser:
             else:
                 # Error: expected semicolon
                 self.error(self.NO_SEMICOLON)
+
             if self.parent is None:
                 return
         return
 
     def error(self, error_type):
         """Handle errors in the definition file."""
-        if False and error_type == self.MISSED_SEMICOLON:
+        if error_type == self.MISSED_SEMICOLON:
             self.parent = None
             self.error_count += 1
             print("Expected a semicolon prior to this")  # tested
@@ -505,7 +514,7 @@ class Parser:
         elif error_type == self.INVALID_PORT_XOR:
             print("Port Absent, Invalid port number for XOR device")
         elif error_type == self.NOT_END:
-            print("Expected 'END' keyword")
+            print("Expected file to end after END keyword") 
         elif error_type == self.REPEATED_MONITOR:
             print("Signal cannot be monitored more than once")
         else:
@@ -544,4 +553,5 @@ class Parser:
         print(f"LINE {self.symbol.line_number}:")
         print(self.scanner.print_error(self.symbol))
         print()
+        self.parent = None
         return
