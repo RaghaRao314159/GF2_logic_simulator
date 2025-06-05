@@ -12,8 +12,9 @@ def adder():
     names_list = ["X1", "X2", "A1", "A2", "O1", "S1", "S2", "S3", "NO1"]
 
     idx_list = my_names.lookup(names_list)
-    
+
     return my_names, names_list, idx_list
+
 
 @pytest.fixture
 def flip_flop():
@@ -23,15 +24,17 @@ def flip_flop():
     names_list = ["D1", "D2", "N1", "C1", "S1", "S2", "S3"]
 
     idx_list = my_names.lookup(names_list)
-    
+
     return my_names, names_list, idx_list
+
 
 @pytest.fixture
 def empty():
     # create class of empty names
     my_names = Names()
-    
+
     return my_names
+
 
 def test_lookup_adder(adder):
     # example case
@@ -42,6 +45,7 @@ def test_lookup_adder(adder):
 
     assert idx_list == exp_idx_list
 
+
 def test_lookup_flip_flop(flip_flop):
     # example case
     (*_, idx_list) = flip_flop
@@ -50,6 +54,7 @@ def test_lookup_flip_flop(flip_flop):
     exp_idx_list = [0, 1, 2, 3, 4, 5, 6]
 
     assert idx_list == exp_idx_list
+
 
 def test_lookup_empty(empty):
     # example case
@@ -63,6 +68,7 @@ def test_lookup_empty(empty):
 
     assert idx_list == exp_idx_list
 
+
 def test_lookup_multiple_lists(empty):
     # example case
     names_list = ["X1", "X2", "A1", "A2", "O1", "S1", "S2", "S3", "NO1"]
@@ -70,6 +76,7 @@ def test_lookup_multiple_lists(empty):
     # lookup for each case individually
     for idx, name in enumerate(names_list):
         assert [idx] == empty.lookup([name])
+
 
 def test_query_adder(adder):
     # example case
@@ -79,6 +86,7 @@ def test_query_adder(adder):
     for idx, name in enumerate(names_list):
         assert my_names.query(name) == idx
 
+
 def test_query_flip_flop(flip_flop):
     # example case
     (my_names, names_list, _) = flip_flop
@@ -86,6 +94,7 @@ def test_query_flip_flop(flip_flop):
     # assert the id of every name
     for idx, name in enumerate(names_list):
         assert my_names.query(name) == idx
+
 
 def test_query_nonexistent(empty):
     # names from our adder circuit
@@ -95,7 +104,8 @@ def test_query_nonexistent(empty):
     empty.lookup(names_list)
 
     # assert the id of every name
-    assert empty.query("D1") == None
+    assert empty.query("D1") is None
+
 
 def test_get_name_string_adder(adder):
     # examples case
@@ -106,6 +116,7 @@ def test_get_name_string_adder(adder):
         print(idx, name, my_names.get_name_string(idx))
         assert my_names.get_name_string(idx) == name
 
+
 def test_get_name_string_flip_flop(flip_flop):
     # examples case
     (my_names, names_list, _) = flip_flop
@@ -114,6 +125,7 @@ def test_get_name_string_flip_flop(flip_flop):
     for idx, name in enumerate(names_list):
         assert my_names.get_name_string(idx) == name
 
+
 def test_get_name_string_nonexistent(adder):
     # examples case
     (my_names, names_list, _) = adder
@@ -121,5 +133,4 @@ def test_get_name_string_nonexistent(adder):
     nonexistent_idx = len(names_list) + 1
 
     # assert the id of every name
-    assert my_names.get_name_string(nonexistent_idx) == None
-
+    assert my_names.get_name_string(nonexistent_idx) is None

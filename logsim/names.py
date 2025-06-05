@@ -10,7 +10,6 @@ Names - maps variable names and string names to unique integers.
 
 
 class Names:
-
     """Map variable names and string names to unique integers.
 
     This class deals with storing grammatical keywords and user-defined words,
@@ -82,7 +81,7 @@ class Names:
             name_id = self.query(name_string)
 
             # check if name has an id
-            if name_id == None:
+            if name_id is None:
                 name_id = self.num_items
                 self.id_names[self.num_items] = name_string
                 self.names_id[name_string] = self.num_items
@@ -93,7 +92,6 @@ class Names:
 
         return names_id_list
 
-
     def get_name_string(self, name_id):
         """Return the corresponding name string for name_id.
 
@@ -103,4 +101,3 @@ class Names:
         # names_id doesn't exist so returns None
         # found the device so returns the ID
         return self.id_names.get(name_id, None)
-        

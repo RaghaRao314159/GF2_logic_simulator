@@ -11,6 +11,7 @@ Gui - configures the main window and all the widgets.
 import wx
 import wx.glcanvas as wxcanvas
 from OpenGL import GL, GLUT
+from wx.lib.agw.knobctrl import KnobCtrl
 
 from names import Names
 from devices import Devices
@@ -388,9 +389,17 @@ class Gui(wx.Frame):
         sim_sizer.Add(speed_sizer, 0, wx.ALIGN_RIGHT | wx.ALL, 5)
         
         # Cycles control
+        # self.cycles_label = wx.StaticText(control_panel, label=f"Number of cycles: {self.cycles_knob.GetValue()}")
         cycles_label = wx.StaticText(control_panel, label="Number of Cycles:")
-        self.cycles_spin = wx.SpinCtrl(control_panel, value="10", min=1, max=1000)
-        
+        # self.cycles_spin = wx.SpinCtrl(control_panel, value="10", min=1, max=1000)
+        # self.cycles_slider = wx.Slider(control_panel, value=10, minValue=1, maxValue=1000, style=wx.SL_HORIZONTAL | wx.SL_LABELS)
+        self.cycles_knob = KnobCtrl(control_panel, size=(80, 80))  # Only parent and size here
+        # self.cycles_knob.SetMinValue(1)
+        # self.cycles_knob.SetMaxValue(1000)
+        self.cycles_knob.SetValue(10)       # Set initial value
+        self.cycles_knob.SetTags([1, 20, 40, 60, 80, 100])  # Optional: show tick marks
+        self.cycles_knob.SetAngularRange(-160, 160)
+
         # Buttons with better styling
         self.run_button = wx.Button(control_panel, label="Run Simulation")
         self.stop_button = wx.Button(control_panel, label="Stop")
@@ -398,7 +407,10 @@ class Gui(wx.Frame):
         
         # Add simulation controls
         sim_sizer.Add(cycles_label, 0, wx.ALL, 5)
-        sim_sizer.Add(self.cycles_spin, 0, wx.EXPAND | wx.ALL, 5)
+        # sim_sizer.Add(self.cycles_spin, 0, wx.EXPAND | wx.ALL, 5)
+        # sim_sizer.Add(self.cycles_slider, 0, wx.EXPAND | wx.ALL, 5)
+        sim_sizer.Add(self.cycles_knob, 0, wx.EXPAND | wx.ALL, 5)
+
         sim_sizer.Add(self.run_button, 0, wx.EXPAND | wx.ALL, 5)
         sim_sizer.Add(self.stop_button, 0, wx.EXPAND | wx.ALL, 5)
         sim_sizer.Add(self.reset_button, 0, wx.EXPAND | wx.ALL, 5)
@@ -475,9 +487,11 @@ class Gui(wx.Frame):
         self.toggle_switch_btn.Bind(wx.EVT_BUTTON, self.on_toggle_switch)
         self.switch_list.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_switch_selected)
         self.speed_btn.Bind(wx.EVT_BUTTON, self.on_speed_button)
+        # self.cycles_slider.Bind(wx.EVT_SLIDER, self.on_slider)
+        # self.update_switch_list()
+        self.cycles_knob.Bind(wx.EVT_SCROLL, self.on_knob)
         
         # Initialize lists
-        self.update_switch_list()
         
         # Set minimum window size
         self.SetMinSize((800, 600))
@@ -501,17 +515,33 @@ class Gui(wx.Frame):
         if Id == wx.ID_ABOUT:
             wx.MessageBox("Logic Simulator\nCreated by:\nAyoife Dada\nNarmeephan Arunthavarajah\nRaghavendra Narayan Rao\n2025",
                           "About Logsim", wx.ICON_INFORMATION | wx.OK)
-
+    
+    '''
     def on_spin(self, event):
         """Handle the event when the user changes the spin control value."""
         spin_value = self.cycles_spin.GetValue()
         text = "".join(["New spin control value: ", str(spin_value)])
         self.canvas.render(text)
+    
+    def on_slider(self, event):
+        """Handle the event when the user changes the slider value."""
+        slider_value = self.cycles_slider.GetValue()
+        text = f"New cycle count: {slider_value}"
+        self.canvas.render(text)
+    '''
+    def on_knob(self, event):
+        """Handle the event when the user changes the knob value."""
+        knob_value = self.cycles_knob.GetValue()
+        # self.cycles_value.SetLabel("Number of cycles: {self.cycles_knob.GetValue()}")
+        text = f"New cycle count: {knob_value}"
+        self.canvas.render(text)
 
     def on_run_button(self, event):
         """Handle the event when the user clicks the run button."""
         if not self.is_running:
-            cycles = self.cycles_spin.GetValue()
+            # cycles = self.cycles_spin.GetValue()
+            # cycles = self.cycles_slider.GetValue()
+            cycles = self.cycles_knob.GetValue()
             self.start_simulation(cycles)
         else:
             self.SetStatusText("Simulation already running")
@@ -537,7 +567,9 @@ class Gui(wx.Frame):
             self.run_button.Disable()
             self.stop_button.Enable()
             self.reset_button.Disable()
-            self.cycles_spin.Disable()
+            # self.cycles_spin.Disable()
+            # self.cycles_slider.Disable()
+            self.cycles_knob.Disable()
             
             # Start the simulation timer with current speed setting
             self.simulation_timer.Start(self.speed_settings[self.current_speed])
@@ -551,7 +583,10 @@ class Gui(wx.Frame):
             self.run_button.Enable()
             self.stop_button.Disable()
             self.reset_button.Enable()
-            self.cycles_spin.Enable()
+            # self.cycles_spin.Enable()
+            # self.cycles_slider.Enable()
+            # self.cycles_slider.SetFocus()
+            self.cycles_knob.Enable()
             
     def reset_simulation(self):
         """Reset the simulation to its initial state."""
@@ -569,6 +604,7 @@ class Gui(wx.Frame):
         self.canvas.render()
         
         self.SetStatusText("Simulation reset")
+        # self.cycles_slider.SetFocus()
         
     def on_simulation_tick(self, event):
         """Handle a single simulation step."""

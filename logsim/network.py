@@ -9,7 +9,6 @@ Network - builds and executes the network.
 
 
 class Network:
-
     """Build and execute the network.
 
     This class contains many functions required for connecting devices together
@@ -242,7 +241,7 @@ class Network:
 
         if device.device_kind == self.devices.XOR:
             # Output is high only if both inputs are different
-            if input_signal_list[0] == input_signal_list[1]:  # assume two inputs
+            if input_signal_list[0] == input_signal_list[1]:  # assume 2 inputs
                 output_signal = self.devices.LOW
             else:
                 output_signal = self.devices.HIGH

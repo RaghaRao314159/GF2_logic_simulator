@@ -11,7 +11,6 @@ Symbol - encapsulates a symbol and stores its properties.
 
 
 class Symbol:
-
     """Encapsulate a symbol and store its properties.
 
     Parameters
@@ -32,7 +31,6 @@ class Symbol:
 
 
 class Scanner:
-
     """Read circuit definition file and translate the characters into symbols.
 
     Once supplied with the path to a valid definition file, the scanner
@@ -215,6 +213,7 @@ class Scanner:
 
     def get_name(self):
         """Seek the next name string in input_file.
+
         Return the name string (or None) and the next non-alphanumeric character.
         """
         name_str = ''
@@ -254,14 +253,13 @@ class Scanner:
                 self.position += 3
     
     def initialise_lines(self):
+        """Initialise the lines of the file as a list of strings."""
         with open(self.path) as f:
-            # l = [line.rstrip() for line in f]
-            # l = [x for x in l if x.strip()]
             l = [line for line in f]
             return l
 
     def print_error(self, symbol):
-        "Print an error message with the symbol's line number and position."
+        """Print an error message with the symbol's line number and position."""
         # dictionary of lines
         message = ""
         
@@ -273,4 +271,3 @@ class Scanner:
             message = "Line number out of range."
     
         return message
-          
