@@ -7,7 +7,6 @@ MyNames - implements a name table for lexical analysis.
 
 
 class MyNames:
-
     """Implements a name table for lexical analysis.
 
     Parameters
@@ -39,7 +38,6 @@ class MyNames:
             self.id_names[self.numitems] = name_string
             self.numitems += 1
         return self.names_id[name_string]
-        
 
     def get_string(self, name_id):
         """Return the corresponding name string for the given name_id.
@@ -53,6 +51,7 @@ class MyNames:
         if self.id_names.get(name_id, -1) == -1:
             return None
         return self.id_names[name_id]
-        
+
     def get_ids(self):
+        """Return the dictionary mapping name IDs to name strings."""
         return self.id_names
