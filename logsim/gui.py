@@ -386,9 +386,8 @@ class CustomListCtrl(wx.ListCtrl):
         self.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.on_item_selected)
         self.Bind(wx.EVT_SCROLLWIN, self.on_scroll)
         self.Bind(wx.EVT_PAINT, self.on_paint)
-        self.Bind(wx.EVT_LEFT_DOWN, self.on_left_click)  # Add click handling
-        self.Bind(wx.EVT_LEFT_UP, self.on_left_click)    # Add for Linux compatibility
-        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_item_activated)  # Fallback for Linux
+        self.Bind(wx.EVT_LEFT_UP, self.on_left_click)    # Use only mouse up for toggling
+        # Removed EVT_LIST_ITEM_ACTIVATED for toggling
         
         # Create a timer for delayed refresh
         self.refresh_timer = wx.Timer(self)
@@ -574,40 +573,6 @@ class CustomListCtrl(wx.ListCtrl):
                     wx.MessageBox(f"Failed to toggle switch {switch_name}", "Error",
                                 wx.OK | wx.ICON_ERROR)
         
-        event.Skip()
-
-    def on_item_activated(self, event):
-        """Handle item activation (double-click or enter) to toggle switches (Linux fallback)."""
-        # Use the same logic as on_left_click, but only for the state column
-        item = event.GetIndex()
-        if item != -1 and hasattr(self, 'switch_renderers') and item in self.switch_renderers:
-            # Only toggle if the state column is activated
-            # On Linux, activation is usually on the first column, so always allow
-            parent = self.gui
-            switch_name = self.GetItem(item, 0).GetText()
-            [device_id, _] = parent.devices.get_signal_ids(switch_name)
-            device = parent.devices.get_device(device_id)
-            current_state = device.switch_state
-            new_state = parent.devices.LOW if current_state == parent.devices.HIGH else parent.devices.HIGH
-            if parent.devices.set_switch(device_id, new_state):
-                switch_theme = {
-                    'background': parent.current_theme['list']['background'],
-                    'switch_on': parent.current_theme['switch']['on'],
-                    'switch_off': parent.current_theme['switch']['off'],
-                    'switch_bg': parent.current_theme['switch']['handle']
-                }
-                self.switch_renderers[item] = SwitchRenderer(
-                    new_state == parent.devices.HIGH,
-                    switch_theme
-                )
-                parent.SetStatusText(f"[Activated] Toggled {switch_name} to {'HIGH' if new_state == parent.devices.HIGH else 'LOW'}")
-                self.Refresh()
-                if parent.network.execute_network():
-                    parent.update_display()
-                else:
-                    wx.MessageBox("Error: Network oscillating", "Error", wx.OK | wx.ICON_ERROR)
-            else:
-                wx.MessageBox(f"Failed to toggle switch {switch_name}", "Error", wx.OK | wx.ICON_ERROR)
         event.Skip()
 
 class SwitchRenderer(wx.ItemAttr):
