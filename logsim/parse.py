@@ -96,6 +96,14 @@ class Parser:
             print("Network connectivity issues found")
             print()
             self.error_count += 1
+            
+        
+        # check if no devices are present
+        if (self.error_count == 0) and (len(self.devices.find_devices()) == 0) and  (len(self.monitors.get_signal_names()) == 0):
+            self.error_count += 1
+            print("Empty File")
+            print()
+        
 
         if self.error_count > 0:
             print(f"Summary: {self.error_count} error/s found\n")
@@ -172,6 +180,9 @@ class Parser:
                 self.devices.NO_QUALIFIER,
                 self.devices.INVALID_QUALIFIER
             ]:
+                if error == self.devices.NO_QUALIFIER:  
+                    error = self.NOT_BIT
+                    return error
                 error = self.NOT_BIT
             elif error == self.devices.NO_ERROR:
                 error = self.NO_ERROR
@@ -537,6 +548,8 @@ class Parser:
             print("Expected file to end after END keyword") 
         elif error_type == self.REPEATED_MONITOR:
             print("Signal cannot be monitored more than once")
+        elif error_type == self.CLOCK_PERIOD_ZERO:
+            print("clock period cannot be zero")
         else:
             print("Unknown error")
         print(f"LINE {self.symbol.line_number}:")

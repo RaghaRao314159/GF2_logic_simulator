@@ -1,0 +1,5 @@
+/*
+    Name the gates, switches and clocks. 
+    Number of inputs and outputs
+    does not need to be defined for DTYPE 
+*/ 

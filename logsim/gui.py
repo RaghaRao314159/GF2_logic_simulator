@@ -362,6 +362,7 @@ class MyGLCanvas(wxcanvas.GLCanvas):
         self.init = False  # Force canvas redraw
         self.render()
 
+
 class CustomListCtrl(wx.ListCtrl):
     """A custom ListCtrl with better dark mode support."""
     def __init__(self, parent, style, gui=None):
@@ -452,7 +453,7 @@ class CustomListCtrl(wx.ListCtrl):
         # Draw the switch
         renderer = self.switch_renderers[index]
         renderer.DrawItem(dc, switch_rect, None)
-        
+
     def on_item_selected(self, event):
         """Handle item selection to ensure switches stay visible."""
         event.Skip()
@@ -463,7 +464,7 @@ class CustomListCtrl(wx.ListCtrl):
         self.base_color = base_color
         self.alt_color = alt_color
         self.header_color = header_color or base_color
-        
+
         # Set the background color of the list control itself
         self.SetBackgroundColour(base_color)
         
@@ -610,6 +611,7 @@ class CustomListCtrl(wx.ListCtrl):
                 wx.MessageBox(f"Failed to toggle switch {switch_name}", "Error", wx.OK | wx.ICON_ERROR)
         event.Skip()
 
+
 class SwitchRenderer(wx.ItemAttr):
     """Custom renderer for switch state column to show a toggle switch."""
     def __init__(self, is_on=False, theme=None):
@@ -626,31 +628,31 @@ class SwitchRenderer(wx.ItemAttr):
         """Draw the toggle switch."""
         # Set up colors based on state
         switch_color = self.theme['switch_on'] if self.is_on else self.theme['switch_off']
-        
+
         # Calculate switch dimensions - make it slightly larger
         switch_width = min(48, rect.width - 8)  # Max width of 48px, with 4px padding on each side
         switch_height = min(24, rect.height - 8)  # Max height of 24px, with 4px padding
-        
+
         # Center the switch in the cell
         x = rect.x + (rect.width - switch_width) // 2
         y = rect.y + (rect.height - switch_height) // 2
-        
+
         # Draw switch background (rounded rectangle) with thicker border
         dc.SetPen(wx.Pen(switch_color, 2))  # Thicker border
         dc.SetBrush(wx.Brush(switch_color))
         dc.DrawRoundedRectangle(x, y, switch_width, switch_height, switch_height // 2)
-        
+
         # Draw the toggle circle - slightly larger
         circle_size = switch_height - 6  # Slightly smaller than height for padding
         circle_x = x + 3 + (switch_width - circle_size - 6) * (1 if self.is_on else 0)
         circle_y = y + 3
-        
+
         # Add a subtle shadow effect
         shadow_color = wx.Colour(0, 0, 0, 30)  # Semi-transparent black
         dc.SetPen(wx.Pen(shadow_color, 1))
         dc.SetBrush(wx.Brush(shadow_color))
         dc.DrawCircle(circle_x + circle_size // 2 + 1, circle_y + circle_size // 2 + 1, circle_size // 2)
-        
+
         # Draw the main circle
         dc.SetPen(wx.Pen(self.theme['switch_bg'], 2))  # Thicker border for the circle
         dc.SetBrush(wx.Brush(self.theme['switch_bg']))
@@ -1011,8 +1013,11 @@ class Gui(wx.Frame):
         if Id == wx.ID_EXIT:
             self.Close(True)
         if Id == wx.ID_ABOUT:
-            wx.MessageBox("Logic Simulator\nCreated by:\nAyoife Dada\nNarmeephan Arunthavarajah\nRaghavendra Narayan Rao\n2025",
-                          "About Logsim", wx.ICON_INFORMATION | wx.OK)
+            wx.MessageBox(
+                "Logic Simulator\nCreated by:\nAyoife Dada\nNarmeephan Arunthavarajah\nRaghavendra Narayan Rao\n2025",
+                "About Logsim",
+                wx.ICON_INFORMATION | wx.OK
+            )
         if Id == wx.ID_HELP:
             wx.MessageBox(
                 """
@@ -1063,7 +1068,10 @@ For more help, see the project documentation or contact the authors.
     def on_spin(self, event):
         """Handle the event when the user changes the spin control value."""
         spin_value = self.cycles_spin.GetValue()
-        text = "".join(["New spin control value: ", str(spin_value)])
+        text = "".join([
+            "New spin control value: ",
+            str(spin_value)
+        ])
         self.canvas.render(text)
 
     def on_run_button(self, event):
@@ -1264,12 +1272,16 @@ For more help, see the project documentation or contact the authors.
             if signal_name == self.devices.get_signal_name(device_id, output_id):
                 # Remove the monitor
                 if self.monitors.remove_monitor(device_id, output_id):
-                    self.SetStatusText(f"Zapped monitor for {signal_name}")
+                    self.SetStatusText(
+                        f"Zapped monitor for {signal_name}"
+                    )
                 else:
-                    wx.MessageBox(f"Failed to zap monitor {signal_name}", "Error",
-                                wx.OK | wx.ICON_ERROR)
+                    wx.MessageBox(
+                        f"Failed to zap monitor {signal_name}",
+                        "Error",
+                        wx.OK | wx.ICON_ERROR
+                    )
                 break
-                
         # Update display after monitor is removed
         self.update_monitor_list(show_states=self.is_running)
         self.update_signal_display()
@@ -1313,7 +1325,6 @@ For more help, see the project documentation or contact the authors.
                          wx.OK | wx.ICON_INFORMATION)
             dialog.Destroy()
             return
-        
         # Add signal selection
         signal_sizer = wx.BoxSizer(wx.HORIZONTAL)
         signal_label = wx.StaticText(dialog, label="Signal:")
@@ -1358,77 +1369,83 @@ For more help, see the project documentation or contact the authors.
             # Get the length of signal history from the first monitor
             first_monitor = next(iter(self.monitors.monitors_dictionary.values()))
             current_cycles = len(first_monitor)
-        
         # Find the device and output IDs for this signal
         for device_id in self.devices.find_devices():
             device = self.devices.get_device(device_id)
             for output_id in device.outputs:
                 if signal_name == self.devices.get_signal_name(device_id, output_id):
                     # Add the monitor with current signal history length
-                    if self.monitors.make_monitor(device_id, output_id, current_cycles) == self.monitors.NO_ERROR:
-                        self.update_monitor_list(show_states=self.is_running)  # Update the list immediately
-                        self.update_signal_display()  # Update the canvas
-                        self.SetStatusText(f"Added monitor for {signal_name}")
+                    if (
+                        self.monitors.make_monitor(device_id, output_id, current_cycles)
+                        == self.monitors.NO_ERROR
+                    ):
+                        self.update_monitor_list(show_states=self.is_running)
+                        self.update_signal_display()
+                        self.SetStatusText(
+                            f"Added monitor for {signal_name}"
+                        )
                         return True
                     else:
-                        wx.MessageBox(f"Failed to add monitor for {signal_name}", "Error",
-                                    wx.OK | wx.ICON_ERROR)
+                        wx.MessageBox(
+                            f"Failed to add monitor for {signal_name}",
+                            "Error",
+                            wx.OK | wx.ICON_ERROR
+                        )
                         return False
         return False
 
     def on_add_all_monitors(self, event, dialog):
         """Handle adding all available monitors."""
         _, non_monitored = self.monitors.get_signal_names()
-        
         if not non_monitored:
-            wx.MessageBox("No signals available to monitor", "Error",
-                         wx.OK | wx.ICON_ERROR)
+            wx.MessageBox(
+                "No signals available to monitor",
+                "Error",
+                wx.OK | wx.ICON_ERROR
+            )
             return
-            
         # Ask for confirmation
-        dlg = wx.MessageDialog(dialog, 
-                             f"Add all {len(non_monitored)} available signals?",
-                             "Confirm Add All",
-                             wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
-        
+        dlg = wx.MessageDialog(
+            dialog,
+            f"Add all {len(non_monitored)} available signals?",
+            "Confirm Add All",
+            wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION
+        )
         if dlg.ShowModal() == wx.ID_YES:
             success_count = 0
             for signal_name in non_monitored:
                 if self.add_single_monitor(signal_name):
                     success_count += 1
-            
             self.SetStatusText(f"Added {success_count} monitors")
-            dialog.EndModal(wx.ID_CANCEL)  # Close the add monitor dialog
-            
+            dialog.EndModal(wx.ID_CANCEL)
         dlg.Destroy()
 
     def on_remove_monitor(self, event):
         """Handle removing all monitors."""
         if not self.monitors.monitors_dictionary:
-            wx.MessageBox("No monitors to zap", "Error",
-                         wx.OK | wx.ICON_ERROR)
+            wx.MessageBox(
+                "No monitors to zap",
+                "Error",
+                wx.OK | wx.ICON_ERROR
+            )
             return
-            
         # Ask for confirmation
-        dlg = wx.MessageDialog(None, 
-                             "Are you sure you want to zap all monitors?",
-                             "Confirm Zap All",
-                             wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
-        
+        dlg = wx.MessageDialog(
+            None,
+            "Are you sure you want to zap all monitors?",
+            "Confirm Zap All",
+            wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION
+        )
         if dlg.ShowModal() == wx.ID_YES:
             # Get all monitors before removing them
             monitor_count = len(self.monitors.monitors_dictionary)
-            
             # Remove all monitors
             for (device_id, output_id) in list(self.monitors.monitors_dictionary.keys()):
                 self.monitors.remove_monitor(device_id, output_id)
-                    
             # Update display after all monitors are removed
             self.update_monitor_list(show_states=self.is_running)
             self.update_signal_display()
-            
             self.SetStatusText(f"Zapped all {monitor_count} monitors")
-        
         dlg.Destroy()
 
     def update_switch_list(self):
@@ -1486,7 +1503,11 @@ For more help, see the project documentation or contact the authors.
         if self.network.execute_network():
             self.update_display()
         else:
-            wx.MessageBox("Error: Network oscillating", "Error", wx.OK | wx.ICON_ERROR)
+            wx.MessageBox(
+                "Error: Network oscillating",
+                "Error",
+                wx.OK | wx.ICON_ERROR
+            )
         self.SetStatusText("All switches set to ON")
 
     def on_all_off(self, event):
@@ -1498,7 +1519,11 @@ For more help, see the project documentation or contact the authors.
         if self.network.execute_network():
             self.update_display()
         else:
-            wx.MessageBox("Error: Network oscillating", "Error", wx.OK | wx.ICON_ERROR)
+            wx.MessageBox(
+                "Error: Network oscillating",
+                "Error",
+                wx.OK | wx.ICON_ERROR
+            )
         self.SetStatusText("All switches set to OFF")
 
     def on_speed_button(self, event):
@@ -1508,31 +1533,27 @@ For more help, see the project documentation or contact the authors.
         next_index = (current_index + 1) % len(speeds)
         self.current_speed = speeds[next_index]
         self.speed_btn.SetLabel(self.current_speed)
-        
         # Update timer if simulation is running
         if self.is_running:
             self.simulation_timer.Stop()
-            self.simulation_timer.Start(self.speed_settings[self.current_speed])
+            self.simulation_timer.Start(
+                self.speed_settings[self.current_speed]
+            )
 
     def apply_theme(self):
         """Apply the current theme to all widgets."""
         # Apply to main window and panel backgrounds
         self.SetBackgroundColour(self.current_theme['background'])
-        
         # Apply to control panel and its background
         self.control_panel.SetBackgroundColour(self.current_theme['background'])
-        
         # Apply to buttons with consistent white text
         button_text_color = wx.Colour(255, 255, 255)
-        
         # Main control buttons
         self.run_button.SetBackgroundColour(self.current_theme['button']['run'])
         self.stop_button.SetBackgroundColour(self.current_theme['button']['stop'])
         self.reset_button.SetBackgroundColour(self.current_theme['button']['reset'])
-        
         for btn in [self.run_button, self.stop_button, self.reset_button]:
             btn.SetForegroundColour(button_text_color)
-        
         # Secondary buttons with theme-based background
         secondary_buttons = [
             self.all_on_btn,
@@ -1541,11 +1562,9 @@ For more help, see the project documentation or contact the authors.
             self.remove_monitor_btn,
             self.speed_btn
         ]
-        
         for btn in secondary_buttons:
             btn.SetBackgroundColour(self.current_theme['list']['background'])
             btn.SetForegroundColour(self.current_theme['text'])
-        
         # Apply to lists - only set background colors, let text inherit from theme
         for lst in [self.switch_list, self.monitor_list]:
             lst.set_colors(
@@ -1553,16 +1572,14 @@ For more help, see the project documentation or contact the authors.
                 self.current_theme['list']['alternate']
             )
             lst.SetBackgroundColour(self.current_theme['list']['background'])
-            
             # Update text color for all items in the list
             if lst == self.switch_list:
                 for i in range(lst.GetItemCount()):
-                    item = lst.GetItem(i, 0)  # Get first column
+                    item = lst.GetItem(i, 0)
                     item.SetTextColour(self.current_theme['text'])
                     lst.SetItem(item)
                 # --- Begin: Update switch renderers with new theme ---
                 for index, renderer in lst.switch_renderers.items():
-                    # Get current state
                     is_high = renderer.is_on
                     switch_theme = {
                         'background': self.current_theme['list']['background'],
@@ -1574,28 +1591,21 @@ For more help, see the project documentation or contact the authors.
                 lst.Refresh()
                 wx.CallAfter(lst.draw_all_switches)
                 # --- End: Update switch renderers with new theme ---
-        
         # Apply to static boxes and their backgrounds
         for box in [self.sim_box, self.switch_box, self.monitor_box]:
             box.SetBackgroundColour(self.current_theme['static_box']['background'])
             box.SetForegroundColour(self.current_theme['text'])
             # Update the label color
-            box.SetLabel(box.GetLabel())  # This triggers a label refresh
-            
-            # Force the label to update its color
             label = box.GetLabel()
-            box.SetLabel("")  # Clear the label
-            box.SetLabel(label)  # Set it back
-        
+            box.SetLabel("")
+            box.SetLabel(label)
         # Apply to spin control and its text
         self.cycles_spin.SetBackgroundColour(self.current_theme['list']['background'])
         self.cycles_spin.SetForegroundColour(self.current_theme['text'])
-        
         # Apply to all static text controls in the panel
         for child in self.control_panel.GetChildren():
             if isinstance(child, wx.StaticText):
                 child.SetForegroundColour(self.current_theme['text'])
-        
         # Update canvas colors and text colors
         self.canvas.background_color = (
             self.current_theme['canvas']['background'].Red() / 255.0,
@@ -1618,13 +1628,12 @@ For more help, see the project documentation or contact the authors.
             self.canvas.signal_colors = self.dark_signal_colors
         else:
             self.canvas.signal_colors = self.light_signal_colors
-        self.canvas.render()  # Force canvas redraw to update signal colors
-        self.update_monitor_list(show_states=self.is_running)  # Refresh monitor table colors
-        
+        self.canvas.render()
+        self.update_monitor_list(show_states=self.is_running)
         # Refresh all widgets
         self.control_panel.Refresh()
         self.canvas.render()
-        self.Update()  # Ensure the frame updates completely
+        self.Update()
 
     def on_light_mode(self, event):
         """Handle switching to light mode."""
