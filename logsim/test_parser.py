@@ -13,7 +13,7 @@ from parse import Parser
 
 
 @pytest.fixture
-def parser_with_devices():
+def parser_with_adder():
     """Return a parser instance with some devices already created."""
     names = Names()
     devices = Devices(names)
@@ -145,12 +145,12 @@ def parser_with_error_monitor():
     return parser
 
 
-def test_monitor_connections(parser_with_devices):
+def test_monitor_adder(parser_with_adder):
     """Test if the parser correctly handles monitor connections."""
-    parser, names, devices, network, monitors = parser_with_devices
+    parser, names, devices, network, monitors = parser_with_adder
 
     # Parse the network which includes monitor definitions
-    parser.parse_network()
+    assert parser.parse_network()
 
     # Get the device IDs we expect to be monitored based on test_adder.txt
     [X2_ID, O1_ID, NO1_ID] = names.lookup(["X2", "O1", "NO1"])
@@ -184,7 +184,7 @@ def test_monitor_connections_flip_flop(parser_with_flip_flop):
     parser, names, devices, network, monitors = parser_with_flip_flop
 
     # Parse the network which includes monitor definitions
-    parser.parse_network()
+    assert parser.parse_network()
 
     # Get the device IDs we expect to be monitored based on test_flip_flop.txt
     [D1_ID, N1_ID, QBAR_ID] = names.lookup(["D1", "N1", "QBAR"])
