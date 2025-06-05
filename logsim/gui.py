@@ -739,16 +739,24 @@ class Gui(wx.Frame):
         
         # Add signal color sets for light and dark mode
         self.light_signal_colors = [
-            (0.0, 0.0, 1.0),    # Blue
-            (0.0, 0.7, 0.0),    # Green
-            (1.0, 0.0, 0.0),    # Red
-            (0.7, 0.0, 0.7),    # Purple
+            (0.95, 0.65, 0.60),  # Soft Coral Pink (a gentle start to the spectrum)
+            (1.00, 0.75, 0.50),  # Soft Peach Orange (a light, warm orange)
+            (0.95, 0.80, 0.40),  # Pale Canary Yellow (a delicate, light yellow)
+            (0.60, 0.85, 0.60),  # Minty Green (a fresh, light green)
+            (0.55, 0.80, 0.85),  # Light Aqua (a soft, airy blue-green)
+            (0.60, 0.75, 0.95),  # Powder Blue (a gentle, light blue)
+            (0.75, 0.65, 0.90),  # Soft Lavender (a pale, calming purple)
+            (0.85, 0.60, 0.80),  # Pale Mauve (a muted, light violet-pink)
         ]
         self.dark_signal_colors = [
-            (0.0, 0.8, 1.0),    # Cyan
-            (0.0, 1.0, 0.5),    # Bright Green
-            (1.0, 0.5, 0.0),    # Orange
-            (1.0, 0.0, 1.0),    # Magenta
+            (1.00, 0.05, 0.65),  # Neon Magenta (a vibrant, hot pink to kick off)
+            (1.00, 0.10, 0.10),  # Neon Red (a bright, intense red)
+            (1.00, 0.50, 0.00),  # Neon Orange (a vivid, fiery orange)
+            (1.00, 1.00, 0.00),  # Neon Yellow (a pure, dazzling yellow)
+            (0.20, 1.00, 0.20),  # Neon Lime Green (an electric, bright green)
+            (0.00, 0.80, 1.00),  # Neon Cyan (a brilliant, striking blue)
+            (0.50, 0.20, 1.00),  # Neon Indigo (a deep, electric blue-purple)
+            (0.80, 0.00, 1.00),  # Neon Violet (a radiant, intense purple)
         ]
         
         # Configure the file menu
