@@ -845,7 +845,7 @@ class Gui(wx.Frame):
         
         # Create a list control for switches
         self.switch_list = CustomListCtrl(self.control_panel, style=wx.LC_REPORT, gui=self)
-        self.switch_list.InsertColumn(0, "Name", width=150)  # Switch name column
+        self.switch_list.InsertColumn(0, "Switch", width=150)  # Switch name column
         self.switch_list.InsertColumn(1, "State", width=80)  # State column
         
         # Enable multiple selection
@@ -874,7 +874,7 @@ class Gui(wx.Frame):
         # Create monitor list with proper columns - only one set of columns
         self.monitor_list = CustomListCtrl(self.control_panel, style=wx.LC_REPORT, gui=self)
         self.monitor_list.InsertColumn(0, "", width=20)   # Narrow column for color indicator
-        self.monitor_list.InsertColumn(1, "Name", width=140)  # Device name column
+        self.monitor_list.InsertColumn(1, "Signal", width=140)  # Device name column
         self.monitor_list.InsertColumn(2, "State", width=55)  # State column, narrower
         self.monitor_list.InsertColumn(3, "", width=45)  # Zap button column, even wider for scroll bar
         
@@ -891,7 +891,7 @@ class Gui(wx.Frame):
         
         # Add/Remove monitor buttons
         monitor_btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.add_monitor_btn = wx.Button(self.control_panel, label="Add Monitor")
+        self.add_monitor_btn = wx.Button(self.control_panel, label="Add Monitor/s")
         self.remove_monitor_btn = wx.Button(self.control_panel, label="Zap All")
         monitor_btn_sizer.Add(self.add_monitor_btn, 1, wx.RIGHT, 5)
         monitor_btn_sizer.Add(self.remove_monitor_btn, 1)
