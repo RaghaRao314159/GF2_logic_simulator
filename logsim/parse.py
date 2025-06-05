@@ -49,8 +49,9 @@ class Parser:
             self.PORT_ABSENT, self.OUTPUT_TO_OUTPUT, self.NOT_CONNECTED,
             self.INVALID_PORT, self.INVALID_PORT_DTYPE,
             self.INVALID_PORT_XOR, self.NOT_I_PORT,
-            self.PORT_OUT_RANGE, self.NOT_END, self.REPEATED_MONITOR
-        ] = range(28)
+            self.PORT_OUT_RANGE, self.NOT_END, self.REPEATED_MONITOR, 
+            self.REPEATED_DEVICE, self.MISSED_SEMICOLON
+        ] = range(30)
         # Device types that require dot notation for ports
         self.dot_signals = {
             "IN": [self.devices.D_TYPE],
@@ -119,6 +120,9 @@ class Parser:
         if error == self.devices.QUALIFIER_PRESENT:
             error = self.QUALIFIER_PRESENT
             return error
+        if error == self.devices.DEVICE_PRESENT:
+            error = self.REPEATED_DEVICE
+            return error
         elif error == self.devices.NO_ERROR:
             error = self.NO_ERROR
             return error
@@ -185,6 +189,11 @@ class Parser:
                     return self.NO_DEVICE_TYPE
             else:
                 return self.NO_COLON
+        elif self.symbol.id in [
+                self.scanner.DEVICES_ID, self.scanner.CONNECT_ID,
+                self.scanner.MONITOR_ID, self.scanner.END_ID]:
+            return self.MISSED_SEMICOLON
+
         else:
             return self.INVALID_NAME
 
@@ -202,6 +211,7 @@ class Parser:
         while True:
             if self.symbol.type == self.scanner.COMMA:
                 self.symbol = self.scanner.get_symbol()
+
                 error = self.device()
                 # Check for errors in the subsequent devices
                 if error != self.NO_ERROR:
@@ -345,21 +355,25 @@ class Parser:
         if self.parent is None:
             return
         # Check for more connections
-        while self.symbol.type == self.scanner.COMMA:
-            self.symbol = self.scanner.get_symbol()
-            error = self.connection()
-            # Check for errors in the subsequent connections
-            if error != self.NO_ERROR:
-                self.error(error)
-            # Check if there are more connections to be made
+        while True:
+            if self.symbol.type == self.scanner.COMMA:
+                self.symbol = self.scanner.get_symbol()
+                error = self.connection()
+                # Check for errors in the subsequent connections
+                if error != self.NO_ERROR:
+                    self.error(error)
+                # Check if there are more connections to be made
+                if self.parent is None:
+                    return
+            elif self.symbol.type == self.scanner.SEMICOLON:
+                # End of connection list
+                self.symbol = self.scanner.get_symbol()
+                break
+            else:
+                # Error: expected semicolon
+                self.error(self.NO_SEMICOLON)
             if self.parent is None:
                 return
-        if self.symbol.type == self.scanner.SEMICOLON:
-            # End of connection list
-            self.symbol = self.scanner.get_symbol()
-        else:
-            # Error: expected semicolon
-            self.error(self.NO_SEMICOLON)
         return
 
     def monitor(self):
@@ -430,6 +444,15 @@ class Parser:
 
     def error(self, error_type):
         """Handle errors in the definition file."""
+        if False and error_type == self.MISSED_SEMICOLON:
+            self.parent = None
+            self.error_count += 1
+            print("Expected a semicolon prior to this")  # tested
+            print(f"LINE {self.symbol.line_number}:")
+            print(self.scanner.print_error(self.symbol))
+            print()
+            return
+        
         self.error_count += 1
         stopping_punctuation_flag = False
         if error_type == self.NO_SEMICOLON:
@@ -461,6 +484,8 @@ class Parser:
             print("Connection should not be made to SWITCH or CLOCK")
         elif error_type == self.DEVICE_ABSENT:
             print("Device not found")  # tested
+        elif error_type == self.REPEATED_DEVICE:
+            print("Device has already been initialised")
         elif error_type == self.INPUT_CONNECTED:
             print("Input has already been connected")
         elif error_type == self.INPUT_TO_INPUT:
@@ -482,7 +507,7 @@ class Parser:
         elif error_type == self.NOT_END:
             print("Expected 'END' keyword")
         elif error_type == self.REPEATED_MONITOR:
-            print("Signal cannot be monitored twice")
+            print("Signal cannot be monitored more than once")
         else:
             print("Unknown error")
         print(f"LINE {self.symbol.line_number}:")

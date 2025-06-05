@@ -473,7 +473,7 @@ def test_parser_error_monitor(parser_with_error_monitor, capsys):
         "Port Absent, Port is not a valid gate input port",
         "Device not found",
         "Output cannot be connected to another output",
-        "Signal cannot be monitored twice"]
+        "Signal cannot be monitored more than once"]
 
     expected_lines = [
         "LINE 6:",
