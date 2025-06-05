@@ -1524,6 +1524,20 @@ For more help, see the project documentation or contact the authors.
                     item = lst.GetItem(i, 0)  # Get first column
                     item.SetTextColour(self.current_theme['text'])
                     lst.SetItem(item)
+                # --- Begin: Update switch renderers with new theme ---
+                for index, renderer in lst.switch_renderers.items():
+                    # Get current state
+                    is_high = renderer.is_on
+                    switch_theme = {
+                        'background': self.current_theme['list']['background'],
+                        'switch_on': self.current_theme['switch']['on'],
+                        'switch_off': self.current_theme['switch']['off'],
+                        'switch_bg': self.current_theme['switch']['handle']
+                    }
+                    lst.switch_renderers[index] = SwitchRenderer(is_high, switch_theme)
+                lst.Refresh()
+                wx.CallAfter(lst.draw_all_switches)
+                # --- End: Update switch renderers with new theme ---
         
         # Apply to static boxes and their backgrounds
         for box in [self.sim_box, self.switch_box, self.monitor_box]:
