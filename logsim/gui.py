@@ -739,14 +739,14 @@ class Gui(wx.Frame):
         
         # Add signal color sets for light and dark mode
         self.light_signal_colors = [
-            (0.95, 0.65, 0.60),  # Soft Coral Pink (a gentle start to the spectrum)
-            (1.00, 0.75, 0.50),  # Soft Peach Orange (a light, warm orange)
-            (0.95, 0.80, 0.40),  # Pale Canary Yellow (a delicate, light yellow)
-            (0.60, 0.85, 0.60),  # Minty Green (a fresh, light green)
-            (0.55, 0.80, 0.85),  # Light Aqua (a soft, airy blue-green)
-            (0.60, 0.75, 0.95),  # Powder Blue (a gentle, light blue)
-            (0.75, 0.65, 0.90),  # Soft Lavender (a pale, calming purple)
-            (0.85, 0.60, 0.80),  # Pale Mauve (a muted, light violet-pink)
+            (0.90, 0.10, 0.10),  # Hard Red (a strong, clear red)
+            (1.00, 0.55, 0.00),  # Hard Orange (a vibrant, classic orange)
+            (0.95, 0.80, 0.10),  # Hard Yellow (a rich, golden yellow, clearly visible)
+            (0.10, 0.65, 0.20),  # Hard Green (a solid, true green)
+            (0.00, 0.60, 0.70),  # Hard Teal/Cyan (a strong, bright blue-green)
+            (0.00, 0.35, 0.85),  # Hard Blue (a bold, definite blue)
+            (0.45, 0.15, 0.70),  # Hard Indigo/Purple (a deep, rich purple)
+            (0.85, 0.05, 0.60),  # Hard Magenta (a vibrant, deep pink/magenta)
         ]
         self.dark_signal_colors = [
             (1.00, 0.05, 0.65),  # Neon Magenta (a vibrant, hot pink to kick off)
