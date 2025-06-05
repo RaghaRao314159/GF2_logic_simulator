@@ -90,9 +90,17 @@ class Parser:
                 # Error: expected a section keyword
                 self.error(self.NO_INITIALISATION_KEYWORD)
             self.parent = None
+        
+        if self.error_count == 0 and not self.network.check_network():
+            print()
+            print("Network connectivity issues found")
+            print()
+            self.error_count += 1
+
         if self.error_count > 0:
             print(f"Summary: {self.error_count} error/s found\n")
             return False
+        
         return True
 
     def end_of_file(self):
