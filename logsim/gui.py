@@ -1166,11 +1166,6 @@ For more help, see the project documentation or contact the authors.
             else:
                 self.monitor_list.SetItemBackgroundColour(index, self.current_theme['list']['alternate'])
             
-            # Then set color only for the vertical bar
-            item = self.monitor_list.GetItem(index, 0)
-            item.SetTextColour(wx_color)
-            self.monitor_list.SetItem(item)
-            
             # Clear any text colors first
             for col in [1,2,3]:  # For all columns including zap button
                 for i in range(self.monitor_list.GetItemCount()):

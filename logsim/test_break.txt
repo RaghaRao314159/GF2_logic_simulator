@@ -12,11 +12,7 @@ DEVICES D1:DTYPE,
         C1:CLOCK 8, # Period is a power of 2
         S1:SWITCH 0, 
         S2:SWITCH 1,
-<<<<<<< HEAD
         S3:SWITCH 0 ,
-=======
-        S3:SWITCH 0, # missing semicolon
->>>>>>> 801b606f90461022893cbbdf8458420b1d7951c2
 
 /* connect inputs and outputs */
 CONNECT S1 > D1.SET,
