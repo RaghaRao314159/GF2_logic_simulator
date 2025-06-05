@@ -19,7 +19,7 @@ CONNECT S1 > D1.SET,
         S3 > D1.CLEAR,
         S3 > D2.CLEAR,
 
-        C1 > D1.CLK
+        C1 > D1.CLK,
         C1 > D2.CLK,
 
         D1.Q > D2.DATA,

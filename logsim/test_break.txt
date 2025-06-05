@@ -12,7 +12,7 @@ DEVICES D1:DTYPE,
         C1:CLOCK 8, # Period is a power of 2
         S1:SWITCH 0, 
         S2:SWITCH 1,
-        S3:SWITCH 0 ;
+        S3:SWITCH 0 ,
 
 /* connect inputs and outputs */
 CONNECT S1 > D1.SET,
