@@ -469,6 +469,18 @@ class Parser:
             print(self.scanner.print_error(self.symbol))
             print()
             return
+
+        if self.symbol.id in [
+                self.scanner.DEVICES_ID, self.scanner.CONNECT_ID,
+                self.scanner.MONITOR_ID, self.scanner.END_ID]:
+            self.parent = None
+            self.error_count += 1
+            print("Expected a semicolon prior to this")  # tested
+            print(f"LINE {self.symbol.line_number}:")
+            print(self.scanner.print_error(self.symbol))
+            print()
+            return
+            
         
         self.error_count += 1
         stopping_punctuation_flag = False
@@ -536,6 +548,13 @@ class Parser:
             self.symbol = self.scanner.get_symbol()
             self.parent = None
             return
+        
+        if self.symbol.id in [
+                self.scanner.DEVICES_ID, self.scanner.CONNECT_ID,
+                self.scanner.MONITOR_ID, self.scanner.END_ID]:
+            self.parent = None
+            return
+        
         while self.symbol.type != self.scanner.EOF:
             self.symbol = self.scanner.get_symbol()
             if self.parent and self.symbol.type == self.scanner.COMMA:
