@@ -23,6 +23,7 @@ from scanner import Scanner
 from parse import Parser
 from userint import UserInterface
 from gui import Gui
+import os
 
 
 def main(arg_list):
@@ -37,6 +38,7 @@ def main(arg_list):
                      "Graphical user interface: logsim.py <file path>")
     try:
         options, arguments = getopt.getopt(arg_list, "hc:")
+        print('options:', options, 'arguments:', arguments)
     except getopt.GetoptError:
         print("Error: invalid command line arguments\n")
         print(usage_message)
@@ -75,10 +77,13 @@ def main(arg_list):
         scanner = Scanner(path, names)
         parser = Parser(names, devices, network, monitors, scanner)
         if parser.parse_network():
+            # get the language from the environment variable LANG
+            language = os.getenv('LANG', 'en_GB.UTF-8')
+            print("Current LANG:", language)
             # Initialise an instance of the gui.Gui() class
             app = wx.App()
             gui = Gui("Logic Simulator", path, names, devices, network,
-                      monitors)
+                      monitors, language)
             gui.Show(True)
             app.MainLoop()
 

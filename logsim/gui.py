@@ -693,7 +693,7 @@ class Gui(wx.Frame):
                                 remove monitor button.
     """
 
-    def __init__(self, title, path, names, devices, network, monitors):
+    def __init__(self, title, path, names, devices, network, monitors, language):
         """Initialise widgets and layout."""
         super().__init__(parent=None, title=title, size=(1024, 768))
         
@@ -701,7 +701,8 @@ class Gui(wx.Frame):
         self.devices = devices
         self.monitors = monitors
         self.network = network
-        
+        self.language = language
+
         # Add simulation speed settings
         self.speed_settings = {
             'x0.5': 400,  # 800ms
